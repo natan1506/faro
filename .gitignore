@@ -1,0 +1,15 @@
+/target
+node_modules/
+app/dist/
+app/src-tauri/gen/
+*.db
+*.db-wal
+*.db-shm
+.DS_Store
+.superpowers/
+_to_delete/
+.playwright-mcp/
+
+# Documentos internos: contam o incidente e o contexto de trabalho; ficam só na máquina.
+CLAUDE.md
+docs/superpowers/

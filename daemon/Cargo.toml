@@ -1,0 +1,29 @@
+[package]
+name = "vigia-daemon"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Daemon do Vigia: lê o Endpoint Security (via eslogger), aplica regras e alerta"
+
+[[bin]]
+name = "vigia-daemon"
+path = "src/main.rs"
+
+[dependencies]
+vigia-proto = { path = "../crates/proto" }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "io-util", "process", "sync", "time", "signal", "fs"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+rusqlite = { version = "0.32", features = ["bundled"] }
+globset = "0.4"
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+anyhow = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+libc = "0.2"
+ureq = { version = "2", features = ["json"] }
+clap = { version = "4", features = ["derive"] }
+
+[dev-dependencies]
+tempfile = "3"

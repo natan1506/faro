@@ -1,0 +1,74 @@
+# Configuração do Vigia. O instalador gera /Library/Application Support/Vigia/config.yaml
+# a partir deste arquivo. Depois de editar: sudo launchctl kickstart -k system/dev.natan.vigia
+#
+# `~` é trocado pela home abaixo (o daemon roda como root, então `~` sozinho não serviria).
+
+user:
+  home: __HOME__
+  uid: __UID__
+
+# Pastas onde você clona repositórios de terceiros (código em que você não confia).
+# Dentro delas, node/npm abrindo um shell já vira alerta, e nenhum .env é "do próprio projeto".
+third_party_dirs:
+  - __TERCEIROS__
+
+notify:
+  ntfy:
+    # Alertas críticos no celular. Instale o app ntfy, assine o tópico e ligue aqui.
+    enabled: false
+    server: https://ntfy.sh
+    topic: "__TOPICO__"   # longo e aleatório: no ntfy.sh quem souber o nome lê
+    min_severity: critical
+
+learning_hours: 24        # a regra de rede só aprende nas primeiras 24 h
+retention_days: 30
+dedup_secs: 120
+
+# Os valores abaixo são os padrões; apague o que não quiser mudar.
+rules:
+  secret_read:
+    enabled: true
+    severity: critical
+    same_project_ok: true   # next dev lendo o .env do próprio repo não alerta
+  third_party_shell:
+    enabled: true
+    severity: high
+  unsigned_exec:
+    enabled: true
+    severity: high
+  persistence:
+    enabled: true
+    severity: critical
+  tcc_change:
+    enabled: true
+    severity: critical
+  new_connection:
+    enabled: true
+    severity: medium
+
+# Exceções fixas. As que você cria pelo botão "Permitir sempre" vão para allow.yaml.
+# Cada exceção vale para uma regra (ou "*") e um processo, por signing_id
+# (só para apps com assinatura de desenvolvedor) ou por caminho.
+allow:
+  # Spotlight, Time Machine, Quick Look e afins leem tudo, inclusive .env.
+  - { rule: secret_read, path_prefix: "/System/" }
+  - { rule: secret_read, path_prefix: "/usr/libexec/" }
+  - { rule: secret_read, path_prefix: "/usr/sbin/" }
+  # Editores e terminais.
+  - { rule: secret_read, path_prefix: "/Applications/Visual Studio Code.app/" }
+  - { rule: secret_read, path_prefix: "/Applications/Cursor.app/" }
+  - { rule: secret_read, path_prefix: "/Applications/Warp.app/" }
+  - { rule: secret_read, path_prefix: "/Applications/iTerm.app/" }
+  - { rule: secret_read, path_prefix: "/System/Applications/Utilities/Terminal.app/" }
+  # Navegadores leem os próprios cookies.
+  - { rule: secret_read, path_prefix: "/Applications/Google Chrome.app/" }
+  - { rule: secret_read, path_prefix: "/Applications/Brave Browser.app/" }
+  # Ferramentas que leem credenciais da AWS e do GitHub de propósito.
+  - { rule: secret_read, path_prefix: "/usr/local/bin/aws" }
+  - { rule: secret_read, path_prefix: "/opt/homebrew/bin/aws" }
+  - { rule: secret_read, path_prefix: "/usr/local/bin/gh" }
+  - { rule: secret_read, path_prefix: "/opt/homebrew/bin/gh" }
+  - { rule: secret_read, path_prefix: "/usr/bin/ssh" }
+  - { rule: secret_read, path_prefix: "/usr/bin/git" }
+  - { rule: secret_read, path_prefix: "/Library/Developer/CommandLineTools/usr/bin/git" }
+  - { rule: secret_read, path_prefix: "/Applications/Xcode.app/" }

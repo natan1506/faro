@@ -1,0 +1,830 @@
+/* O "notch" do Vigia: uma pílula preta grudada no topo da tela, com a raposinha.
+   Em Macs com notch ela abraça o recorte da câmera; nos outros, faz as vezes
+   dele. Sempre escura, independente do tema, porque encosta na barra de menus.
+
+   Vistas:
+     pill   – recolhida, da altura da barra de menus
+     home   – clicou: estado do daemon e atalho para o painel
+     chat   – perguntas à IA (última resposta)
+     quick  – ajustes rápidos: som e tempo de fechamento
+     alert  – um alerta pedindo decisão                                         */
+html,
+body {
+  background: transparent;
+  overflow: hidden;
+}
+
+:root {
+  --ear: 9px;
+  --bar: 24px; /* altura da barra de menus; o script ajusta */
+  --text: #f5f5f7;
+  --soft: #aeaeb2;
+  --dim: #8e8e93;
+  --amber: #e8a33d;
+  --alarm: #ff453a;
+  --ok: #30d158;
+}
+
+.notch {
+  position: relative;
+  /* Centralizada: durante o zoom a janela é maior que a pílula. */
+  margin: 0 auto;
+  background: #000;
+  color: var(--text);
+  border-radius: 0 0 14px 14px;
+  overflow: visible;
+}
+.notch[data-view="home"],
+.notch[data-view="chat"],
+.notch[data-view="quick"],
+.notch[data-view="alert"] {
+  border-radius: 0 0 22px 22px;
+}
+
+/* "Orelhas": a curva côncava que liga a pílula à barra de menus, como no notch de verdade. */
+.notch::before,
+.notch::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: var(--ear);
+  height: var(--ear);
+  pointer-events: none;
+}
+.notch::before {
+  left: calc(-1 * var(--ear));
+  background: radial-gradient(circle at 0 100%, transparent calc(var(--ear) - 0.5px), #000 var(--ear));
+}
+.notch::after {
+  right: calc(-1 * var(--ear));
+  background: radial-gradient(circle at 100% 100%, transparent calc(var(--ear) - 0.5px), #000 var(--ear));
+}
+
+/* ---------------------------------------------------------------------- */
+/* Faixa de cima (sempre visível): raposinha à esquerda, estado à direita.     */
+
+.bar {
+  height: var(--bar);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 0 10px;
+}
+/* Só empurra o contador para a direita; a pílula fechada não tem texto. */
+.bar .spacer {
+  flex: 1;
+  min-width: 0;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--soft);
+  font-variant-numeric: tabular-nums;
+}
+.chip .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 0 3px rgba(48, 209, 88, 0.16);
+}
+/* Número de avisos: pequeno, borda vermelha e fundo vermelho a 30%. */
+.chip[data-state="alert"] {
+  color: #fff;
+  background: rgba(255, 69, 58, 0.3);
+  box-shadow: inset 0 0 0 1px var(--alarm);
+  border-radius: 8px;
+  padding: 0 5px;
+  font-size: 10px;
+  line-height: 15px;
+}
+.chip[data-state="alert"] .dot {
+  display: none;
+}
+.chip[data-state="sleep"] .dot {
+  background: var(--dim);
+  box-shadow: none;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Corpo (peek e alert)                                                    */
+
+.body {
+  padding: 4px 18px 14px;
+  transform-origin: top center;
+}
+
+/* Zoom ao abrir e fechar: a pílula cresce a partir da faixa (com uma sobra
+   no fim, como uma mola) e o conteúdo entra crescendo; ao fechar, o inverso. */
+.notch.morph {
+  /* Corta o conteúdo que ainda não cabe, mas deixa as orelhas para fora. */
+  clip-path: inset(0 calc(-1 * var(--ear)) 0 calc(-1 * var(--ear)));
+}
+.notch.opening {
+  transition:
+    width 380ms cubic-bezier(0.34, 1.32, 0.5, 1),
+    height 380ms cubic-bezier(0.34, 1.32, 0.5, 1),
+    border-radius 380ms ease;
+}
+.notch.closing {
+  transition:
+    width 240ms cubic-bezier(0.4, 0, 0.6, 1),
+    height 240ms cubic-bezier(0.4, 0, 0.6, 1),
+    border-radius 240ms ease;
+  border-radius: 0 0 14px 14px;
+}
+.body.zoom-in {
+  animation: zoom-in 380ms cubic-bezier(0.34, 1.32, 0.5, 1) both;
+}
+.body.zoom-out {
+  animation: zoom-out 240ms cubic-bezier(0.4, 0, 0.6, 1) both;
+}
+@keyframes zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  45% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes zoom-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+}
+
+.home {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 14px;
+  align-items: center;
+}
+.home .big-fox {
+  grid-row: span 3;
+}
+.home .line1 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.home .line2 {
+  color: var(--soft);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.home .links {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+}
+.home .links button,
+.more {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--amber);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.home .links button:hover,
+.more:hover {
+  color: #ffc46b;
+}
+
+/* Linha de cima das vistas abertas */
+.toprow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.toprow .tabs,
+.toprow .tools {
+  display: flex;
+  gap: 4px;
+}
+.ib {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--soft);
+}
+.ib svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+.ib svg.stroke {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+.ib svg .waves {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.ib:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+.ib.tab-alert {
+  position: relative;
+  color: #ff8a80;
+}
+.ib.tab-alert .tab-n:not(:empty) {
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  min-width: 13px;
+  height: 13px;
+  padding: 0 3px;
+  border-radius: 7px;
+  background: rgba(255, 69, 58, 0.3);
+  box-shadow: inset 0 0 0 1px var(--alarm);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 13px;
+  text-align: center;
+}
+.ib[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+.ib.sound[aria-pressed="true"] {
+  background: transparent;
+}
+.ib.sound.off {
+  color: var(--dim);
+}
+
+/* Troca de vista com a pílula aberta: fade + deslize de 8 px. */
+.notch.switching {
+  transition: width 160ms ease;
+}
+.body.swap {
+  animation: swap 160ms ease both;
+}
+@keyframes swap {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .notch.switching {
+    transition: none;
+  }
+  .body.swap {
+    animation: none;
+  }
+}
+
+/* Ajustes rápidos */
+.quick {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.qrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.qlabel {
+  font-size: 13px;
+}
+.quick .more {
+  align-self: flex-start;
+}
+.muted {
+  color: var(--soft);
+  margin: 0;
+}
+.switch {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  width: 34px;
+  height: 20px;
+  margin: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  transition: background 140ms;
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 140ms;
+}
+.switch:checked {
+  background: var(--ok);
+}
+.switch:checked::after {
+  transform: translateX(14px);
+}
+.volume {
+  width: 150px;
+  accent-color: var(--amber);
+}
+.volume:disabled {
+  opacity: 0.4;
+}
+.segs {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+}
+.seg {
+  border: 0;
+  border-radius: 6px;
+  padding: 3px 9px;
+  background: transparent;
+  color: var(--soft);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.seg[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+/* Conversar */
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat-top .picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+.chat-top label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--soft);
+  font-size: 11.5px;
+}
+.chat select,
+.chat .modelo-outro,
+.chat-input {
+  border: 0;
+  border-radius: 7px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+  min-width: 0;
+}
+.chat select option {
+  color: #000;
+}
+.chat-answer {
+  max-height: 150px;
+  overflow-y: auto;
+}
+.chat .msg {
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.chat .msg.erro .msg-text {
+  color: var(--alarm);
+}
+.chat .msg-tag {
+  color: var(--dim);
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+.chat .msg-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: #d1d1d6;
+}
+.chat .msg.streaming.vazio .msg-text::after {
+  content: "pensando…";
+  color: var(--dim);
+}
+.chat .sugestoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.chat .sugestao,
+.chat .send,
+.chat .codex-aviso button {
+  border: 0;
+  border-radius: 7px;
+  padding: 5px 11px;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.chat .sugestao:hover,
+.chat .send:hover:not(:disabled),
+.chat .codex-aviso button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+}
+.chat .sugestao {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.chat .sug-marca {
+  font-size: 10.5px;
+  font-weight: 600;
+  opacity: 0.65;
+}
+.chat .sugestao.confirm {
+  background: var(--amber);
+  color: #1c1c1e;
+}
+.chat .sugestao.perigo.confirm {
+  background: var(--alarm);
+  color: #fff;
+}
+.chat .tag-codex {
+  align-self: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(232, 113, 10, 0.22);
+  color: #ffa14d;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.chat .send:disabled,
+.chat .codex-aviso button:disabled {
+  opacity: 0.4;
+}
+.chat .codex-aviso button.primario {
+  background: var(--amber);
+  color: #1c1c1e;
+}
+.chat .codex-aviso {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(232, 113, 10, 0.16);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.chat .codex-aviso p {
+  margin: 0 0 8px;
+}
+.chat .linha-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chat-empty,
+.chat-note {
+  margin: 0;
+  color: var(--soft);
+  font-size: 12.5px;
+}
+.chat-compose {
+  display: flex;
+  gap: 6px;
+}
+.chat-input {
+  flex: 1;
+  padding: 6px 10px;
+}
+.chat-input::placeholder {
+  color: var(--dim);
+}
+.chat-input:disabled {
+  opacity: 0.5;
+}
+/* Chat no formato do Coucou: card escuro com brilho, raposinha à esquerda. */
+.chat-card {
+  display: flex;
+  gap: 14px;
+  padding: 12px 12px 12px 6px;
+  border-radius: 16px;
+  /* Brilho âmbar, no tom da raposinha; borda cinza-clara. */
+  background:
+    radial-gradient(60% 80% at 58% 78%, rgba(232, 150, 61, 0.24), transparent 70%),
+    radial-gradient(40% 60% at 90% 10%, rgba(255, 255, 255, 0.04), transparent 70%),
+    #121214;
+  border: 1px solid rgba(220, 220, 228, 0.32);
+}
+.chat-side {
+  flex: none;
+  display: flex;
+  align-items: center;
+  padding-top: 8px;
+}
+.chat-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat-ctx {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.chat-ctx-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  color: #f2f2f7;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chat-ctx-chip .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+}
+.chat-ctx-chip[data-state="alert"] .dot {
+  background: var(--alarm);
+}
+.chat-ctx-chip[data-state="sleep"] .dot {
+  background: var(--dim);
+}
+.chat .more {
+  flex: none;
+  white-space: nowrap;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--soft);
+  font-size: 11.5px;
+}
+.chat .more:hover {
+  color: #fff;
+}
+.chat-answer {
+  min-height: 34px;
+}
+.chat-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.chat-meta .tag-codex {
+  margin-right: auto;
+}
+.chat-top .picker {
+  justify-content: flex-end;
+}
+/* Campo arredondado com o botão redondo de enviar dentro, como no Coucou. */
+.chat-compose {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 4px 4px 4px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+.chat-compose:focus-within {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+.chat-compose .chat-input {
+  flex: 1;
+  padding: 6px 8px 6px 0;
+  background: transparent;
+  border-radius: 0;
+  font-size: 13px;
+  outline: none;
+}
+.chat .chat-compose .send {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: #000;
+}
+.chat .chat-compose .send:hover:not(:disabled) {
+  background: #e5e5ea;
+}
+.chat .chat-compose .send:disabled {
+  opacity: 0.35;
+}
+.chat-compose .send svg {
+  width: 15px;
+  height: 15px;
+}
+.chat-compose .send svg.stroke {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.chat-compose .send.stop svg {
+  width: 11px;
+  height: 11px;
+  fill: currentColor;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.head .title {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.head .sev {
+  color: var(--soft);
+  font-size: 12px;
+}
+/* "Ignorar" no cabeçalho do alerta: botão de texto, como os links das ações
+   (o X do topo é outra coisa: fecha a pílula). */
+.ignorar {
+  flex: none;
+  border: 0;
+  border-radius: 7px;
+  padding: 3px 4px;
+  background: transparent;
+  color: var(--soft);
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.ignorar:hover {
+  color: var(--text);
+}
+
+.detail {
+  margin: 6px 0 0 40px;
+  color: #d1d1d6;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.target {
+  margin: 6px 0 0 40px;
+  color: var(--soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0 40px;
+}
+.actions button {
+  border: 0;
+  border-radius: 7px;
+  padding: 5px 11px;
+  font-size: 12.5px;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text);
+  white-space: nowrap;
+}
+.actions button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+.actions .kill {
+  background: var(--alarm);
+  color: #fff;
+}
+.actions .kill:hover {
+  background: #ff6259;
+}
+.notch[data-severity="alta"] .actions .kill,
+.notch[data-severity="media"] .actions .kill {
+  background: var(--amber);
+  color: #1c1c1e;
+}
+.actions .kill.confirm {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+.actions .link {
+  background: transparent;
+  color: var(--soft);
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.actions .link:hover {
+  background: transparent;
+  color: var(--text);
+}
+.actions .queue {
+  margin-left: auto;
+  color: var(--soft);
+  font-size: 12px;
+}
+
+.notch[data-view="alert"][data-severity="critica"] {
+  box-shadow: inset 0 -2px 0 var(--alarm);
+}
+.notch[data-view="alert"][data-severity="alta"] {
+  box-shadow: inset 0 -2px 0 var(--amber);
+}
+
+.done {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  padding: 2px 0 2px;
+}
+.error {
+  margin: 8px 0 0 40px;
+  color: var(--alarm);
+  font-size: 12px;
+}
+
+/* Alertas do replay (scripts/dev.sh): azul e etiqueta, para nunca parecerem reais. */
+.sim-tag {
+  flex: none;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(100, 168, 255, 0.18);
+  color: #8cc0ff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.sim-note {
+  margin: 6px 0 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(100, 168, 255, 0.12);
+  color: #b9d8ff;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.notch[data-view="alert"][data-sim="1"] {
+  box-shadow: inset 0 -2px 0 #64a8ff;
+}
+
+/* A faixa abre e fecha a pílula com um clique. */
+.bar {
+  cursor: pointer;
+}

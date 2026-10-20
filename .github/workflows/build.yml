@@ -1,0 +1,100 @@
+# Testa e gera o pacote do Faro para macOS (Intel e Apple Silicon).
+#
+# - Em todo push no main e em pull requests: testes + pacote como artefato.
+# - Em tags v* (ex.: v0.2.0): também publica o pacote como Release.
+# - Dá para rodar à mão em Actions > Build > Run workflow.
+#
+# O pacote (faro-macos-universal.zip) traz o Faro.app, o daemon, os scripts, a
+# config de exemplo e o LaunchDaemon. Para instalar: descompactar e rodar
+# ./scripts/instalar.sh (ele usa os binários prontos, sem compilar).
+# O app sai sem assinatura da Apple; o instalar.sh tira a quarentena do download.
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  testes:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Rust (testes)
+        run: cargo test --workspace
+      - name: Rust (clippy sem avisos)
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Frontend (testes e build)
+        working-directory: app
+        run: |
+          npm ci --no-audit --no-fund
+          npm test
+          npm run build
+
+  pacote:
+    needs: testes
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: App (Faro.app universal)
+        working-directory: app
+        run: |
+          npm ci --no-audit --no-fund
+          npx tauri build --target universal-apple-darwin --bundles app
+      - name: Daemon (universal)
+        run: |
+          cargo build --release -p vigia-daemon --target aarch64-apple-darwin
+          cargo build --release -p vigia-daemon --target x86_64-apple-darwin
+          mkdir -p dist-daemon
+          lipo -create -output dist-daemon/vigia-daemon \
+            target/aarch64-apple-darwin/release/vigia-daemon \
+            target/x86_64-apple-darwin/release/vigia-daemon
+          lipo -info dist-daemon/vigia-daemon
+      - name: Montar o pacote
+        run: |
+          P=faro-macos-universal
+          mkdir -p "$P/bin"
+          cp -R target/universal-apple-darwin/release/bundle/macos/Faro.app "$P/"
+          cp dist-daemon/vigia-daemon "$P/bin/"
+          cp -R scripts config launchd lab "$P/"
+          cp README.md "$P/"
+          echo "${GITHUB_SHA}" > "$P/VERSAO"
+          # ditto preserva o bundle do app (links simbólicos, permissões).
+          ditto -c -k --keepParent "$P" "$P.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: faro-macos-universal
+          path: faro-macos-universal.zip
+          retention-days: 30
+      - name: Release (só em tags v*)
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" faro-macos-universal.zip --title "Faro ${GITHUB_REF_NAME}" --generate-notes

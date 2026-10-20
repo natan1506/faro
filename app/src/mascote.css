@@ -1,0 +1,72 @@
+/* Vigi, a raposinha. As imagens têm margem transparente em volta da cabeça. */
+.fox-wrap {
+  display: inline-block;
+  flex: none;
+  line-height: 0;
+  /* Cabeça acompanhando o olhar (lookAt): vem depois dos olhos, devagar. */
+  transform: translate(var(--head-x, 0px), var(--head-y, 0px)) perspective(200px)
+    rotateY(var(--head-turn, 0deg)) rotateX(var(--head-nod, 0deg)) rotate(var(--head-tilt, 0deg));
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.fox-head {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 92%;
+}
+.fox,
+.fox-eye,
+.fox-blink {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+/* Olhos (calm e alert, com as camadas prontas): andam na direção do mouse. */
+.fox-eye {
+  visibility: hidden;
+  transform: translate(var(--eye-x, 0px), var(--eye-y, 0px));
+  /* rápido e com um leve passo além, como olho de verdade (sacada) */
+  transition: transform 140ms cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+.fox-wrap[data-layers] .fox-eye {
+  visibility: visible;
+}
+/* Quadro da piscada: já decodificado, só aparece por cima durante a piscada. */
+.fox-blink {
+  visibility: hidden;
+}
+.fox-wrap[data-layers][data-blink] .fox-blink {
+  visibility: visible;
+}
+
+.fox-wrap[data-mood="calm"] .fox-head { animation: fox-tilt 6s ease-in-out infinite; }
+.fox-wrap[data-mood="alert"] .fox-head { animation: fox-shake 2.4s ease-in-out infinite; }
+.fox-wrap[data-mood="sleep"] .fox-head { animation: fox-breathe 5s ease-in-out infinite; }
+
+@keyframes fox-tilt {
+  0%, 100% { transform: rotate(0) scale(1); }
+  30% { transform: rotate(-2deg) scale(1.01, 0.99); }
+  60% { transform: rotate(1.5deg); }
+}
+@keyframes fox-shake {
+  0%, 70%, 100% { transform: rotate(0); }
+  74% { transform: rotate(-8deg); }
+  80% { transform: rotate(7deg); }
+  86% { transform: rotate(-4deg); }
+  92% { transform: rotate(2deg); }
+}
+@keyframes fox-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03, 0.98); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fox-head { animation: none !important; }
+  .fox-wrap { transform: none; }
+}
+

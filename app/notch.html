@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Faro</title>
+  </head>
+  <body>
+    <main id="notch" class="notch" data-view="pill" aria-live="polite"></main>
+    <script type="module">
+      // `?mock=1` carrega um Tauri de mentira para conferir a pílula no navegador.
+      if (new URLSearchParams(location.search).has("mock")) {
+        const mock = "/dev/mock-tauri.js";
+        await import(/* @vite-ignore */ mock);
+      }
+      await import("/src/notch.ts");
+    </script>
+  </body>
+</html>

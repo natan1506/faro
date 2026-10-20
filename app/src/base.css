@@ -1,0 +1,128 @@
+/* Tokens compartilhados. Cores do sistema do macOS para o painel; âmbar de
+   lampião e vermelho de alarme só onde há algo a dizer. */
+:root {
+  color-scheme: light dark;
+  --bg: #f2f2f7;
+  --sidebar: #e8e8ed;
+  --surface: #ffffff;
+  --ink: #1c1c1e;
+  --muted: #6c6c70;
+  --line: rgba(60, 60, 67, 0.16);
+  --hover: rgba(60, 60, 67, 0.07);
+  --select: rgba(201, 133, 31, 0.13);
+  --amber: #b8730f;
+  --alarm: #d70015;
+  --calm: #3f7a50;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --r-sm: 6px;
+  --r-md: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1c1e;
+    --sidebar: #252528;
+    --surface: #2c2c2e;
+    --ink: #f2f2f7;
+    --muted: #aeaeb2;
+    --line: rgba(120, 120, 128, 0.32);
+    --hover: rgba(120, 120, 128, 0.16);
+    --select: rgba(232, 163, 61, 0.16);
+    --amber: #e8a33d;
+    --alarm: #ff453a;
+    --calm: #7fb08c;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: default;
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: 12px;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* A "lâmpada" de severidade: o único elemento que brilha. */
+.lamp {
+  display: inline-block;
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.lamp.critica {
+  background: var(--alarm);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--alarm) 22%, transparent);
+}
+.lamp.alta {
+  background: var(--amber);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--amber) 22%, transparent);
+}
+.lamp.media {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--amber);
+}
+.lamp.calm {
+  background: var(--calm);
+}
+
+button {
+  font: inherit;
+}
+/* Mão em tudo que é clicável: botões, links e o que faz papel deles (pedido do Natan). */
+button,
+a[href],
+summary,
+[role="button"],
+[role="tab"],
+[role="link"],
+[onclick] {
+  cursor: pointer;
+}
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"],
+select,
+label:has(> input[type="checkbox"]),
+label:has(> input[type="radio"]) {
+  cursor: pointer;
+}
+button:disabled,
+input:disabled,
+select:disabled,
+[aria-disabled="true"] {
+  cursor: default;
+}
+
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

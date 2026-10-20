@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Faro</title>
+  </head>
+  <body>
+    <aside class="side">
+      <div class="side-drag" data-tauri-drag-region></div>
+      <div class="brand" data-tauri-drag-region>
+        <span id="fox-slot" aria-hidden="true"></span>
+        <span>Faro</span>
+      </div>
+      <nav id="nav" class="nav" aria-label="Seções do painel"></nav>
+      <footer class="side-foot">
+        <span id="state-lamp" class="lamp" aria-hidden="true"></span>
+        <span id="state-text">Conectando…</span>
+      </footer>
+    </aside>
+    <main class="main">
+      <div id="banners"></div>
+      <section id="inicio" class="page" hidden></section>
+      <section id="alertas" class="split" hidden>
+        <aside class="list">
+          <label class="only-new"><input id="only-new" type="checkbox" /> Só os abertos</label>
+          <div id="bulk" class="bulk"></div>
+          <div id="alert-list"></div>
+        </aside>
+        <article id="detail" class="detail" aria-live="polite"></article>
+      </section>
+      <section id="atividade" class="procs" hidden>
+        <div class="procs-tools">
+          <input id="proc-filter" type="search" placeholder="Filtrar por nome, argumento ou pasta" aria-label="Filtrar processos" />
+          <label><input id="hide-apple" type="checkbox" checked /> Ocultar programas da Apple</label>
+          <div id="metrics" class="metrics"></div>
+        </div>
+        <div class="procs-scroll">
+          <table>
+            <thead>
+              <tr><th>Hora</th><th>Programa</th><th>Pasta</th><th>pid</th></tr>
+            </thead>
+            <tbody id="proc-rows"></tbody>
+          </table>
+        </div>
+      </section>
+      <section id="conversa" class="page" hidden></section>
+      <section id="pastas" class="ajustes-tab" hidden></section>
+      <section id="excecoes" class="ajustes-tab" hidden></section>
+      <section id="sons" class="ajustes-tab" hidden></section>
+      <section id="celular" class="ajustes-tab" hidden></section>
+      <section id="regras" class="ajustes-tab" hidden></section>
+    </main>
+    <script type="module">
+      // `?mock=1` carrega um Tauri de mentira para conferir a interface no navegador.
+      // Sem o parâmetro, nada disso roda.
+      if (new URLSearchParams(location.search).has("mock")) {
+        const mock = "/dev/mock-tauri.js";
+        await import(/* @vite-ignore */ mock);
+      }
+      await import("/src/painel.ts");
+    </script>
+  </body>
+</html>

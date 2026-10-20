@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>dev.natan.vigia</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/vigia/vigia-daemon</string>
+        <string>run</string>
+        <string>--config</string>
+        <string>/Library/Application Support/Vigia/config.yaml</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+    <key>ProcessType</key>
+    <string>Interactive</string>
+    <key>StandardOutPath</key>
+    <string>/Library/Logs/Vigia/daemon.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Library/Logs/Vigia/daemon.log</string>
+</dict>
+</plist>

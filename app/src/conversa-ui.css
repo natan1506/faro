@@ -1,0 +1,58 @@
+/* Badge da IA (painel e pílula): a cor da IA na borda e, a 50%, no fundo.
+   O fundo mistura a cor com uma base escura opaca (não com transparente): no
+   tema claro do painel o branco ficava ilegível. A linha sólida antes do
+   color-mix é o fundo para quem não tem color-mix (Safari < 16.2). */
+.ia-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 8px;
+  border: 1px solid var(--ia);
+  border-radius: 999px;
+  background: #3a3a3c;
+  background: color-mix(in srgb, var(--ia) 50%, #1c1c1e);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ia-badge:hover {
+  background: color-mix(in srgb, var(--ia) 62%, #1c1c1e);
+}
+.ia-badge:focus-within {
+  outline: 2px solid color-mix(in srgb, var(--ia) 70%, white);
+  outline-offset: 2px;
+}
+.ia-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ia) 60%, transparent);
+}
+.ia-modelo {
+  font-weight: 500;
+  opacity: 0.85;
+}
+.ia-modelo::before {
+  content: "·";
+  margin-right: 6px;
+  opacity: 0.7;
+}
+.ia-seta {
+  margin-top: -4px;
+  opacity: 0.8;
+}
+/* O <select> nativo cobre o badge inteiro, invisível: o clique abre o menu do sistema. */
+.ia-badge .ia-select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 12px;
+}
