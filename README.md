@@ -25,7 +25,7 @@ ou se instalando no login? O Faro avisa na hora, com um botão para encerrar.
 
 ## Por que existe
 
-Tudo começou com um **teste técnico**. Um repositório de terceiros, clonado só para rodar uma vez, fez em poucos segundos o que todo dev teme:
+Tudo começou com um repositório que parecia **legítimo e inofensivo**. Clonado só para rodar uma vez, ele fez em poucos segundos o que todo dev teme:
 
 1. um `node` rodando dentro do repositório **leu os `.env` de outros projetos** e as credenciais da AWS;
 2. chamou `curl ... | sh`;

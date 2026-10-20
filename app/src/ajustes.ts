@@ -185,7 +185,7 @@ export function renderPastas(el: HTMLElement) {
     return [
       section(
         "Pastas de terceiros",
-        "Onde você clona código em que não confia (teste técnico, repositório de recrutador, projeto baixado). Lá dentro, node/npm abrindo um shell já vira alerta, e nenhum .env conta como \"do próprio projeto\".",
+        "Onde você clona código em que não confia (projeto baixado, exemplo de tutorial, repositório de outra pessoa). Lá dentro, node/npm abrindo um shell já vira alerta, e nenhum .env conta como \"do próprio projeto\".",
         p.folderList("third_party_dirs", "Nenhuma pasta. Recomendo ter pelo menos uma e clonar código de terceiros sempre nela."),
       ),
       section(
