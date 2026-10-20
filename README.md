@@ -71,7 +71,7 @@ Obrigado ao Coucou pela inspiração. 🦊
 ## O que ele faz
 
 - 🦊 **Vigi, a raposinha**, mora na barra de menus e numa pílula no topo da tela. Ela fica calma, assustada quando há alerta e dormindo quando o daemon para. Os olhos seguem o mouse e ela pisca.
-- 🔑 **Leitura de segredos**: `.env*`, `~/.aws`, `~/.ssh`, `~/.npmrc`, cookies e senhas de navegador e Keychain, lidos fora do próprio projeto ou por código numa pasta de terceiros.
+- 🔑 **Acesso a segredos**: avisa quando *outro* processo abre `.env*`, `~/.aws`, `~/.ssh`, `~/.npmrc`, cookies e senhas de navegador ou o Keychain fora do próprio projeto, ou a partir de código numa pasta de terceiros. O Faro **nunca abre nem lê** esses arquivos: o macOS só conta a ele *qual processo* abriu *qual caminho*.
 - 🐚 **Comandos suspeitos**: `node`/`npm`/`bun` chamando `curl`, `osascript`, `nc`, `security`…
 - 🧪 **Binários sem assinatura** rodando de `/tmp`, `~/Downloads`, `~/Library`…
 - 🚪 **Persistência**: LaunchAgent, LaunchDaemon ou item de login novo.
@@ -81,6 +81,15 @@ Obrigado ao Coucou pela inspiração. 🦊
 - 🔔 **Som** quando chega alerta, com volume e som à sua escolha.
 - 💬 **Conversa com a IA** usando o Claude Code ou o Codex que já estão no seu Mac, com um filtro de segredos antes de qualquer coisa sair da máquina.
 - ✅ **Configuração guiada**: a tela Início mostra o que falta para ficar protegido.
+
+## Privacidade
+
+Um app de segurança precisa ser o primeiro a merecer confiança, então:
+
+- **Ele não lê os seus segredos.** O Endpoint Security entrega eventos do tipo "o processo X abriu o arquivo Y", com o caminho. O conteúdo de `.env`, chaves e senhas nunca passa pelo Faro.
+- **Tudo fica no seu Mac.** Os alertas ficam numa base local (SQLite) por 30 dias. Não há conta, servidor nem telemetria.
+- **Internet, só se você pedir.** O Faro não fala com nenhum servidor por conta própria. A única exceção é a conversa com a IA, iniciada por você, que usa o Claude Code ou o Codex do seu Mac, com o filtro de segredos descrito abaixo.
+- **Código aberto.** Dá para conferir tudo isso no código.
 
 ## Instalar
 
