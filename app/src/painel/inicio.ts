@@ -19,6 +19,9 @@ let aberto: StepId | null = null; // passo com o texto de ajuda expandido
 let forcarLista = false; // "ver configuração inicial" com os 6 feitos
 let aviso: { text: string; error: boolean } | null = null;
 let copiado = false;
+/** O Faro.app traz o serviço dentro (Release)? Então o passo vira um botão "Instalar". */
+let embutido = false;
+let instalando = false;
 
 let pedido = 0; // contador para ignorar respostas fora de ordem
 let ultimo = ""; // o que foi desenhado por último, para não refazer o DOM à toa
@@ -26,6 +29,7 @@ let ultimo = ""; // o que foi desenhado por último, para não refazer o DOM à 
 async function carregar() {
   const meu = ++pedido;
   const con = await api.connected().catch(() => false);
+  if (!con) embutido = await api.daemonEmbutido().catch(() => false);
   const [s, st, c, a] = await Promise.all([
     api.status().catch(() => null),
     api.getSettings().catch(() => null),
@@ -66,6 +70,23 @@ async function escolherPasta() {
     aviso = { text: String(e), error: true };
   }
   desenhar();
+}
+
+/** Instala o serviço com a janela de senha do macOS; o app reconecta sozinho em seguida. */
+async function instalarServico() {
+  if (instalando) return;
+  instalando = true;
+  aviso = null;
+  desenhar();
+  try {
+    await api.instalarDaemon();
+    aviso = { text: "Serviço instalado. Agora dê o Acesso Total ao Disco (próximo passo) para ele começar a vigiar.", error: false };
+  } catch (e) {
+    aviso = { text: String(e), error: true };
+  }
+  instalando = false;
+  desenhar();
+  void carregar();
 }
 
 async function abrirUrl(url: string) {
@@ -113,6 +134,9 @@ function ajuda(id: StepId): HTMLElement | null {
 }
 
 function botao(id: StepId, texto: string): HTMLElement {
+  if (id === "daemon" && embutido) {
+    return h("button", { type: "button", class: "add primario", disabled: instalando, onclick: () => void instalarServico() }, instalando ? "Instalando…" : "Instalar");
+  }
   const acao: Record<StepId, () => void> = {
     daemon: () => ((aberto = aberto === "daemon" ? null : "daemon"), desenhar()),
     fda: () => void abrirUrl("x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"),
@@ -215,7 +239,7 @@ function protecoes(): HTMLElement {
 
 function desenhar() {
   if (root.hidden) return; // Início fechado: refaz quando for mostrado (showSection chama renderInicio)
-  const chave = JSON.stringify([connected, status, settings, config, alerts, aberto, forcarLista, aviso, copiado]);
+  const chave = JSON.stringify([connected, status, settings, config, alerts, aberto, forcarLista, aviso, copiado, embutido, instalando]);
   if (chave === ultimo) return;
   ultimo = chave;
   const rolagem = root.scrollTop;

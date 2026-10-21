@@ -130,6 +130,10 @@ export const api = {
   openConversa: () => invoke<void>("open_conversa"),
   /** Abre um link https:// ou dos Ajustes do macOS (x-apple.systempreferences:). */
   openUrl: (url: string) => invoke<void>("open_url", { url }),
+  /** O Faro.app traz o serviço (daemon) dentro, pronto para instalar? */
+  daemonEmbutido: () => invoke<boolean>("daemon_embutido"),
+  /** Instala o serviço pedindo a senha na janela do macOS. */
+  instalarDaemon: () => invoke<void>("instalar_daemon"),
   allowlist: () => invoke<AllowView[]>("allowlist"),
   getSettings: () => invoke<Settings>("get_settings"),
   /** Devolve o que ficou valendo; rejeita com a mensagem do daemon se algo for recusado. */

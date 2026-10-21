@@ -902,6 +902,15 @@ table.excecoes td {
 .inicio button.add:hover {
   background: var(--select);
 }
+/* "Instalar" do primeiro passo: a ação principal da primeira abertura. */
+.inicio button.add.primario {
+  background: var(--amber);
+  color: #fff;
+  font-weight: 600;
+}
+.inicio button.add.primario:disabled {
+  opacity: 0.6;
+}
 .inicio button.link {
   border: 0;
   padding: 0;

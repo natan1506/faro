@@ -4,8 +4,8 @@
 #   ./scripts/instalar.sh              # tudo
 #   ./scripts/instalar.sh --sem-app    # só o daemon (dá para usar `vigia-daemon tail`)
 #
-# Rodando de dentro do pacote do GitHub Actions (faro-macos-universal.zip, que traz
-# bin/vigia-daemon e Faro.app prontos), ele não compila nada: usa os binários do pacote.
+# Para quem compila pelo código. Quem baixa a Release não precisa disto: o
+# Faro.app instala o serviço sozinho (botão "Instalar" da tela Início).
 #
 # Pede a senha de administrador (sudo) para copiar o daemon e o LaunchDaemon.
 set -euo pipefail
@@ -32,31 +32,22 @@ MAIOR="${VERSAO%%.*}"
 [[ -x /usr/bin/eslogger ]] || falha "/usr/bin/eslogger não encontrado"
 
 cd "$RAIZ"
-if [[ -x "$RAIZ/bin/vigia-daemon" ]]; then
-  # Pacote pronto (GitHub Actions): nada para compilar.
-  passo "Usando os binários do pacote"
-  DAEMON_SRC="$RAIZ/bin/vigia-daemon"
-  APP_SRC="$RAIZ/Faro.app"
-  (( COM_APP )) && [[ ! -d "$APP_SRC" ]] && falha "o pacote não tem o Faro.app"
-  # O zip baixado vem marcado com quarentena e o app não tem assinatura da Apple:
-  # sem isso o macOS bloqueia a abertura.
-  xattr -dr com.apple.quarantine "$RAIZ" 2>/dev/null || true
-else
-  command -v cargo >/dev/null || falha "Rust não encontrado. Instale com: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
-  if (( COM_APP )); then
-    command -v npm >/dev/null || falha "Node/npm não encontrado (necessário para o app)"
-  fi
+command -v cargo >/dev/null || falha "Rust não encontrado. Instale com: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+if (( COM_APP )); then
+  command -v npm >/dev/null || falha "Node/npm não encontrado (necessário para o app)"
+fi
 
-  passo "Compilando o daemon"
-  cargo build --release -p vigia-daemon
-  DAEMON_SRC="$RAIZ/target/release/vigia-daemon"
+passo "Compilando o daemon"
+cargo build --release -p vigia-daemon
+DAEMON_SRC="$RAIZ/target/release/vigia-daemon"
 
-  if (( COM_APP )); then
-    passo "Compilando o app (Tauri)"
-    (cd app && npm ci --no-audit --no-fund && npx tauri build --bundles app)
-    APP_SRC="$RAIZ/target/release/bundle/macos/Faro.app"
-    [[ -d "$APP_SRC" ]] || falha "o build do app não gerou $APP_SRC"
-  fi
+if (( COM_APP )); then
+  passo "Compilando o app (Tauri)"
+  # O daemon vai dentro do app, como na Release (o botão Instalar do Início usa este).
+  cp "$DAEMON_SRC" app/src-tauri/resources/vigia-daemon
+  (cd app && npm ci --no-audit --no-fund && npx tauri build --bundles app)
+  APP_SRC="$RAIZ/target/release/bundle/macos/Faro.app"
+  [[ -d "$APP_SRC" ]] || falha "o build do app não gerou $APP_SRC"
 fi
 
 # Pasta de repositórios de terceiros: onde o código não confiável mora.

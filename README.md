@@ -97,16 +97,14 @@ Requisitos: **macOS 13 (Ventura) ou mais novo**, Intel ou Apple Silicon.
 
 ### Pela Release (recomendado)
 
-1. Baixe o `faro-macos-universal.zip` da [última Release](https://github.com/natan1506/faro/releases/latest) e descompacte.
-2. No Terminal, dentro da pasta descompactada:
+1. Baixe o **`Faro.zip`** da [última Release](https://github.com/natan1506/faro/releases/latest) e abra: aparece o **Faro.app**.
+2. Arraste o Faro.app para **Aplicativos** e abra.
+3. Na tela **Início**, clique em **Instalar**. O macOS pede a sua senha para instalar o serviço que vigia o Mac (ele vai dentro do app).
+4. Clique em **Abrir Ajustes do macOS** no passo seguinte e dê **Acesso Total ao Disco** a `/usr/local/vigia/vigia-daemon`. Sem isso o Endpoint Security não sobe.
 
-   ```bash
-   ./scripts/instalar.sh
-   ```
+Pronto: a raposinha passa a vigiar.
 
-O script usa os binários prontos do pacote (não compila nada), pede a senha de administrador, instala o daemon e o LaunchDaemon, abre os Ajustes para você dar **Acesso Total ao Disco** ao daemon (sem isso o Endpoint Security não sobe) e instala o `Faro.app` em `/Applications`.
-
-> O app ainda não tem assinatura da Apple. O instalador tira a marca de quarentena do download para o macOS deixar abrir.
+> **Primeira abertura:** o Faro ainda não tem assinatura da Apple, então o macOS avisa que não pode verificar o app. Vá em **Ajustes do Sistema > Privacidade e Segurança** e clique em **Abrir Mesmo Assim**. Isso só acontece uma vez.
 
 ### Pelo código
 

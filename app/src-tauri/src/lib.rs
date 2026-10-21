@@ -6,6 +6,7 @@
 mod ai;
 mod app_config;
 mod client;
+mod instalador;
 mod notch;
 mod sound;
 #[cfg(target_os = "macos")]
@@ -326,6 +327,36 @@ fn open_painel(app: AppHandle, alert_id: Option<i64>) {
     }
 }
 
+/// Caminho do daemon que vai dentro do Faro.app (recurso do bundle).
+fn daemon_do_bundle(app: &AppHandle) -> Option<std::path::PathBuf> {
+    app.path()
+        .resolve("resources/vigia-daemon", tauri::path::BaseDirectory::Resource)
+        .ok()
+}
+
+/// O Faro.app traz o serviço dentro (build de Release)? Em desenvolvimento, não.
+#[tauri::command]
+fn daemon_embutido(app: AppHandle) -> bool {
+    daemon_do_bundle(&app).is_some_and(|p| p.is_file())
+}
+
+/// Instala (ou atualiza) o serviço pedindo a senha na janela nativa do macOS.
+#[tauri::command]
+async fn instalar_daemon(app: AppHandle) -> Result<(), String> {
+    let origem = daemon_do_bundle(&app).ok_or("não achei o serviço dentro do Faro.app")?;
+    #[cfg(target_os = "macos")]
+    {
+        tauri::async_runtime::spawn_blocking(move || instalador::instalar(&origem))
+            .await
+            .map_err(|e| format!("a instalação parou: {e}"))?
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = origem;
+        Err("o Faro só instala no macOS".into())
+    }
+}
+
 /// Abre um link no navegador ou nos Ajustes do macOS. Só aceita esses dois tipos.
 #[tauri::command]
 fn open_url(url: String) -> Result<(), String> {
@@ -553,6 +584,8 @@ pub fn run() {
             preview_sound,
             pick_sound_file,
             notch::notch_metrics,
+            daemon_embutido,
+            instalar_daemon,
             notch::notch_hit_area,
             notch::notch_focusable,
             notch::notch_cursor,

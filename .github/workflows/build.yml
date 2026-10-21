@@ -1,13 +1,13 @@
-# Testa e gera o pacote do Faro para macOS (Intel e Apple Silicon).
+# Testa e gera o Faro.app para macOS (Intel e Apple Silicon).
 #
-# - Em todo push no main e em pull requests: testes + pacote como artefato.
-# - Em tags v* (ex.: v0.2.0): também publica o pacote como Release.
+# - Em todo push no main e em pull requests: testes + Faro.zip como artefato.
+# - Em tags v* (ex.: v0.2.0): também publica o Faro.zip como Release.
 # - Dá para rodar à mão em Actions > Build > Run workflow.
 #
-# O pacote (faro-macos-universal.zip) traz o Faro.app, o daemon, os scripts, a
-# config de exemplo e o LaunchDaemon. Para instalar: descompactar e rodar
-# ./scripts/instalar.sh (ele usa os binários prontos, sem compilar).
-# O app sai sem assinatura da Apple; o instalar.sh tira a quarentena do download.
+# Como o Coucou: o Faro.zip traz só o Faro.app. O serviço (daemon) vai dentro
+# do app e é instalado pelo botão "Instalar" da tela Início, com a senha do Mac.
+# O app tem assinatura ad-hoc (sem Developer ID da Apple): na primeira abertura
+# o macOS pede "Abrir Mesmo Assim" em Ajustes > Privacidade e Segurança.
 name: Build
 
 on:
@@ -63,38 +63,45 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: app/package-lock.json
-      - name: App (Faro.app universal)
+      - name: Daemon (universal), para ir dentro do app
+        run: |
+          cargo build --release -p vigia-daemon --target aarch64-apple-darwin
+          cargo build --release -p vigia-daemon --target x86_64-apple-darwin
+          lipo -create -output app/src-tauri/resources/vigia-daemon \
+            target/aarch64-apple-darwin/release/vigia-daemon \
+            target/x86_64-apple-darwin/release/vigia-daemon
+          lipo -info app/src-tauri/resources/vigia-daemon
+      - name: App (Faro.app universal, com o daemon dentro)
         working-directory: app
         run: |
           npm ci --no-audit --no-fund
           npx tauri build --target universal-apple-darwin --bundles app
-      - name: Daemon (universal)
+      - name: Assinatura ad-hoc e Faro.zip
         run: |
-          cargo build --release -p vigia-daemon --target aarch64-apple-darwin
-          cargo build --release -p vigia-daemon --target x86_64-apple-darwin
-          mkdir -p dist-daemon
-          lipo -create -output dist-daemon/vigia-daemon \
-            target/aarch64-apple-darwin/release/vigia-daemon \
-            target/x86_64-apple-darwin/release/vigia-daemon
-          lipo -info dist-daemon/vigia-daemon
-      - name: Montar o pacote
-        run: |
-          P=faro-macos-universal
-          mkdir -p "$P/bin"
-          cp -R target/universal-apple-darwin/release/bundle/macos/Faro.app "$P/"
-          cp dist-daemon/vigia-daemon "$P/bin/"
-          cp -R scripts config launchd lab "$P/"
-          cp README.md "$P/"
-          echo "${GITHUB_SHA}" > "$P/VERSAO"
-          # ditto preserva o bundle do app (links simbólicos, permissões).
-          ditto -c -k --keepParent "$P" "$P.zip"
+          APP=target/universal-apple-darwin/release/bundle/macos/Faro.app
+          test -x "$APP/Contents/Resources/resources/vigia-daemon"
+          codesign --force --deep --sign - "$APP"
+          codesign --verify --deep --strict "$APP"
+          # ditto preserva o bundle (links simbólicos, permissões, assinatura).
+          ditto -c -k --keepParent "$APP" Faro.zip
       - uses: actions/upload-artifact@v4
         with:
-          name: faro-macos-universal
-          path: faro-macos-universal.zip
+          name: Faro
+          path: Faro.zip
           retention-days: 30
       - name: Release (só em tags v*)
         if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${GITHUB_REF_NAME}" faro-macos-universal.zip --title "Faro ${GITHUB_REF_NAME}" --generate-notes
+        run: |
+          gh release create "${GITHUB_REF_NAME}" Faro.zip --title "Faro ${GITHUB_REF_NAME}" --notes "$(cat <<'EOF'
+          ## Instalar
+
+          1. Baixe o **Faro.zip** abaixo e abra: aparece o **Faro.app**.
+          2. Arraste o Faro.app para **Aplicativos** e abra.
+          3. Na primeira vez, o macOS avisa que não pode verificar o app (ele ainda não tem assinatura da Apple). Vá em **Ajustes do Sistema > Privacidade e Segurança** e clique em **Abrir Mesmo Assim**.
+          4. Na tela **Início**, clique em **Instalar** (pede a senha do Mac) e depois dê o **Acesso Total ao Disco** ao serviço.
+
+          Requisitos: macOS 13 ou mais novo, Intel ou Apple Silicon.
+          EOF
+          )"
