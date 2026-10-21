@@ -921,6 +921,24 @@ table.excecoes td {
 .ver-config {
   margin: 0;
 }
+.atualizar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+.atualizar button {
+  flex: none;
+  white-space: nowrap;
+}
+.atualizar p {
+  margin: 0;
+  color: var(--ink);
+}
 .passo-ajuda {
   padding: 0 14px 12px 42px;
   color: var(--muted);

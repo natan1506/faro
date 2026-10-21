@@ -22,6 +22,8 @@ let copiado = false;
 /** O Faro.app traz o serviço dentro (Release)? Então o passo vira um botão "Instalar". */
 let embutido = false;
 let instalando = false;
+/** O serviço instalado é de outra versão (ou do antigo /usr/local/vigia): oferece "Atualizar". */
+let desatualizado = false;
 
 let pedido = 0; // contador para ignorar respostas fora de ordem
 let ultimo = ""; // o que foi desenhado por último, para não refazer o DOM à toa
@@ -30,6 +32,7 @@ async function carregar() {
   const meu = ++pedido;
   const con = await api.connected().catch(() => false);
   if (!con) embutido = await api.daemonEmbutido().catch(() => false);
+  desatualizado = con && (await api.servicoDesatualizado().catch(() => false));
   const [s, st, c, a] = await Promise.all([
     api.status().catch(() => null),
     api.getSettings().catch(() => null),
@@ -79,8 +82,14 @@ async function instalarServico() {
   aviso = null;
   desenhar();
   try {
+    const atualizando = desatualizado;
     await api.instalarDaemon();
-    aviso = { text: "Serviço instalado. Agora dê o Acesso Total ao Disco (próximo passo) para ele começar a vigiar.", error: false };
+    aviso = {
+      text: atualizando
+        ? "Serviço atualizado. Dê o Acesso Total ao Disco ao faro-daemon (passo abaixo); se a versão antiga estiver na lista, pode tirá-la."
+        : "Serviço instalado. Agora dê o Acesso Total ao Disco (próximo passo) para ele começar a vigiar.",
+      error: false,
+    };
   } catch (e) {
     aviso = { text: String(e), error: true };
   }
@@ -268,9 +277,19 @@ function protecoes(): HTMLElement {
   return h("section", { class: "group" }, h("h2", {}, "Proteções"), h("div", { class: "protecoes" }, sensor, rede, CELULAR ? celular : null));
 }
 
+function atualizar(): HTMLElement | null {
+  if (!desatualizado) return null;
+  return h(
+    "div",
+    { class: "atualizar" },
+    h("p", {}, "O serviço instalado é de outra versão do Faro. Atualize para usar o que vem neste app (pede a senha do Mac)."),
+    h("button", { type: "button", class: "add primario", disabled: instalando, onclick: () => void instalarServico() }, instalando ? "Atualizando…" : "Atualizar serviço"),
+  );
+}
+
 function desenhar() {
   if (root.hidden) return; // Início fechado: refaz quando for mostrado (showSection chama renderInicio)
-  const chave = JSON.stringify([connected, status, settings, config, alerts, aberto, forcarLista, aviso, copiado, embutido, instalando]);
+  const chave = JSON.stringify([connected, status, settings, config, alerts, aberto, forcarLista, aviso, copiado, embutido, instalando, desatualizado]);
   if (chave === ultimo) return;
   ultimo = chave;
   const rolagem = root.scrollTop;
@@ -280,6 +299,7 @@ function desenhar() {
       { class: "inicio" },
       destaque(),
       aviso ? h("p", { class: aviso.error ? "msg err" : "msg ok", role: "alert" }, aviso.text) : null,
+      atualizar(),
       checklist(),
       protecoes(),
     ),

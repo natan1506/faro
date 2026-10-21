@@ -62,6 +62,7 @@ const comandos = {
   daemon_embutido: () => true,
   instalar_daemon: () => new Promise((ok) => setTimeout(ok, 800)),
   revelar_daemon: () => null,
+  servico_desatualizado: () => new URLSearchParams(location.search).get("servico") === "velho",
   get_settings: () => { if (comandosFora) throw "sem daemon"; return dados.get_settings; },
   save_settings: ({ settings }) => ((dados.get_settings = settings), settings),
   get_app_config: () => dados.get_app_config,

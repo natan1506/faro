@@ -340,6 +340,16 @@ fn daemon_embutido(app: AppHandle) -> bool {
     daemon_do_bundle(&app).is_some_and(|p| p.is_file())
 }
 
+/// O serviço instalado é diferente do que vem dentro deste Faro.app (versão
+/// anterior, ou o antigo /usr/local/vigia)? Então o Início oferece "Atualizar".
+#[tauri::command]
+async fn servico_desatualizado(app: AppHandle) -> bool {
+    let Some(origem) = daemon_do_bundle(&app) else { return false };
+    tauri::async_runtime::spawn_blocking(move || instalador::desatualizado(&origem))
+        .await
+        .unwrap_or(false)
+}
+
 /// Mostra o binário do serviço instalado no Finder, para arrastar até a lista do
 /// Acesso Total ao Disco. O caminho é fixo: o app não abre outro arquivo por aqui.
 #[tauri::command]
@@ -597,6 +607,7 @@ pub fn run() {
             daemon_embutido,
             instalar_daemon,
             revelar_daemon,
+            servico_desatualizado,
             notch::notch_hit_area,
             notch::notch_focusable,
             notch::notch_cursor,

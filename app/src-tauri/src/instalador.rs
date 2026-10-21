@@ -109,6 +109,17 @@ pub fn osascript_arg(script: &str) -> String {
     )
 }
 
+/// O binário instalado em `BIN` difere do que vem no app? Sem o do app (build de
+/// desenvolvimento), não há o que atualizar. Sem o instalado, está desatualizado.
+pub fn desatualizado(daemon_src: &Path) -> bool {
+    desatualizado_em(daemon_src, Path::new(BIN))
+}
+
+fn desatualizado_em(daemon_src: &Path, instalado: &Path) -> bool {
+    let Ok(novo) = std::fs::read(daemon_src) else { return false };
+    std::fs::read(instalado).map_or(true, |atual| atual != novo)
+}
+
 /// Instala ou atualiza o daemon. Mantém a config existente (atualizar o app não
 /// apaga seus ajustes).
 #[cfg(target_os = "macos")]
@@ -178,6 +189,21 @@ mod tests {
     #[test]
     fn script_recusa_delimitador_na_config() {
         assert!(script(Path::new("/a"), "FARO_FIM").is_err());
+    }
+
+    #[test]
+    fn desatualizado_compara_o_conteudo() {
+        let dir = std::env::temp_dir().join(format!("faro-desat-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let (app, inst) = (dir.join("app"), dir.join("inst"));
+        assert!(!desatualizado_em(&app, &inst), "sem o do app, nada a atualizar");
+        std::fs::write(&app, b"v2").unwrap();
+        assert!(desatualizado_em(&app, &inst), "sem o instalado");
+        std::fs::write(&inst, b"v1").unwrap();
+        assert!(desatualizado_em(&app, &inst));
+        std::fs::write(&inst, b"v2").unwrap();
+        assert!(!desatualizado_em(&app, &inst));
+        std::fs::remove_dir_all(&dir).unwrap();
     }
 
     #[test]
