@@ -99,6 +99,19 @@ async function abrirUrl(url: string) {
   desenhar();
 }
 
+/** O binário do serviço instalado: é ele que precisa do Acesso Total ao Disco. */
+const DAEMON = "/usr/local/faro/faro-daemon";
+
+async function revelar() {
+  try {
+    await api.revelarDaemon();
+    aviso = null;
+  } catch (e) {
+    aviso = { text: String(e), error: true };
+  }
+  desenhar();
+}
+
 async function copiar(texto: string) {
   try {
     await navigator.clipboard.writeText(texto);
@@ -121,6 +134,21 @@ function ajuda(id: StepId): HTMLElement | null {
       h("div", { class: "cmd" }, h("code", {}, "./scripts/instalar.sh"), h("button", { type: "button", class: "add", onclick: () => void copiar("./scripts/instalar.sh") }, copiado ? "Copiado" : "Copiar")),
     );
   }
+  if (id === "fda") {
+    return h(
+      "div",
+      { class: "passo-ajuda" },
+      h("p", {}, "A permissão é do serviço, não do Faro.app. Na lista de Acesso Total ao Disco, clique em +, aperte Cmd+Shift+G, cole o caminho abaixo e clique em Abrir. Também dá para arrastar o arquivo do Finder para a lista."),
+      h(
+        "div",
+        { class: "cmd" },
+        h("code", {}, DAEMON),
+        h("button", { type: "button", class: "add", onclick: () => void copiar(DAEMON) }, copiado ? "Copiado" : "Copiar"),
+        h("button", { type: "button", class: "add", onclick: () => void revelar() }, "Mostrar no Finder"),
+      ),
+      h("p", { class: "passo-nota" }, "Ligue a chave do faro-daemon. O passo se marca sozinho em até um minuto."),
+    );
+  }
   if (id === "cofre") {
     const url = config?.cofre_url ?? "";
     return h(
@@ -139,7 +167,10 @@ function botao(id: StepId, texto: string): HTMLElement {
   }
   const acao: Record<StepId, () => void> = {
     daemon: () => ((aberto = aberto === "daemon" ? null : "daemon"), desenhar()),
-    fda: () => void abrirUrl("x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"),
+    fda: () => {
+      aberto = "fda";
+      void abrirUrl("x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles");
+    },
     terceiros: () => void escolherPasta(),
     celular: () => ir("celular"),
     normal: () => ir("atividade"),

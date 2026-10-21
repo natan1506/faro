@@ -13,4 +13,4 @@ _to_delete/
 # Documentos internos: contam o incidente e o contexto de trabalho; ficam só na máquina.
 CLAUDE.md
 docs/superpowers/
-app/src-tauri/resources/vigia-daemon
+app/src-tauri/resources/faro-daemon

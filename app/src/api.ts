@@ -134,6 +134,8 @@ export const api = {
   daemonEmbutido: () => invoke<boolean>("daemon_embutido"),
   /** Instala o serviço pedindo a senha na janela do macOS. */
   instalarDaemon: () => invoke<void>("instalar_daemon"),
+  /** Mostra /usr/local/faro/faro-daemon no Finder (para o Acesso Total ao Disco). */
+  revelarDaemon: () => invoke<void>("revelar_daemon"),
   allowlist: () => invoke<AllowView[]>("allowlist"),
   getSettings: () => invoke<Settings>("get_settings"),
   /** Devolve o que ficou valendo; rejeita com a mensagem do daemon se algo for recusado. */

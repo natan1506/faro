@@ -111,7 +111,7 @@ function renderBanners() {
     box.append(
       banner(
         "O sensor parou",
-        `${s.sensor.reason}. Em geral é falta de Acesso Total ao Disco: em Ajustes > Privacidade e Segurança > Acesso Total ao Disco, adicione /usr/local/vigia/vigia-daemon.`,
+        `${s.sensor.reason}. Em geral é falta de Acesso Total ao Disco: em Ajustes > Privacidade e Segurança > Acesso Total ao Disco, adicione /usr/local/faro/faro-daemon.`,
       ),
     );
   }

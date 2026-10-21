@@ -1011,7 +1011,7 @@ function daemonDown(): Alert {
     title: "O Faro parou de vigiar",
     detail:
       "O daemon não responde há mais de 30 segundos, então nenhum evento está sendo analisado. Verifique com: sudo launchctl print system/dev.natan.vigia",
-    process: { pid: 0, ppid: 0, path: "vigia-daemon" },
+    process: { pid: 0, ppid: 0, path: "faro-daemon" },
     actions: ["dismiss"],
     count: 1,
     status: "open",

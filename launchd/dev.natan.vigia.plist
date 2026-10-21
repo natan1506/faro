@@ -6,7 +6,7 @@
     <string>dev.natan.vigia</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/local/vigia/vigia-daemon</string>
+        <string>/usr/local/faro/faro-daemon</string>
         <string>run</string>
         <string>--config</string>
         <string>/Library/Application Support/Vigia/config.yaml</string>

@@ -2,7 +2,7 @@
 # Instala o Vigia: compila o daemon e o app, instala o LaunchDaemon e abre o app.
 #
 #   ./scripts/instalar.sh              # tudo
-#   ./scripts/instalar.sh --sem-app    # só o daemon (dá para usar `vigia-daemon tail`)
+#   ./scripts/instalar.sh --sem-app    # só o daemon (dá para usar `faro-daemon tail`)
 #
 # Para quem compila pelo código. Quem baixa a Release não precisa disto: o
 # Faro.app instala o serviço sozinho (botão "Instalar" da tela Início).
@@ -11,8 +11,8 @@
 set -euo pipefail
 
 LABEL="dev.natan.vigia"
-BIN_DIR="/usr/local/vigia"
-BIN="$BIN_DIR/vigia-daemon"
+BIN_DIR="/usr/local/faro"
+BIN="$BIN_DIR/faro-daemon"
 DATA_DIR="/Library/Application Support/Vigia"
 LOG_DIR="/Library/Logs/Vigia"
 PLIST="/Library/LaunchDaemons/$LABEL.plist"
@@ -44,7 +44,8 @@ DAEMON_SRC="$RAIZ/target/release/vigia-daemon"
 if (( COM_APP )); then
   passo "Compilando o app (Tauri)"
   # O daemon vai dentro do app, como na Release (o botão Instalar do Início usa este).
-  cp "$DAEMON_SRC" app/src-tauri/resources/vigia-daemon
+  cp "$DAEMON_SRC" app/src-tauri/resources/faro-daemon
+  codesign --force --sign - --identifier dev.natan.faro.daemon app/src-tauri/resources/faro-daemon
   (cd app && npm ci --no-audit --no-fund && npx tauri build --bundles app)
   APP_SRC="$RAIZ/target/release/bundle/macos/Faro.app"
   [[ -d "$APP_SRC" ]] || falha "o build do app não gerou $APP_SRC"
@@ -95,6 +96,8 @@ read -r -p "Aperte Enter quando tiver liberado... "
 
 passo "Iniciando o daemon"
 sudo launchctl bootout "system/$LABEL" 2>/dev/null || true
+# Até a 0.1.0 o binário se chamava /usr/local/vigia/vigia-daemon.
+sudo rm -rf /usr/local/vigia
 sudo launchctl bootstrap system "$PLIST"
 sleep 3
 if sudo launchctl print "system/$LABEL" | grep -q "state = running"; then

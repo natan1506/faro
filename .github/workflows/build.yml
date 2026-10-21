@@ -67,10 +67,14 @@ jobs:
         run: |
           cargo build --release -p vigia-daemon --target aarch64-apple-darwin
           cargo build --release -p vigia-daemon --target x86_64-apple-darwin
-          lipo -create -output app/src-tauri/resources/vigia-daemon \
+          lipo -create -output app/src-tauri/resources/faro-daemon \
             target/aarch64-apple-darwin/release/vigia-daemon \
             target/x86_64-apple-darwin/release/vigia-daemon
-          lipo -info app/src-tauri/resources/vigia-daemon
+          lipo -info app/src-tauri/resources/faro-daemon
+          # Assinatura ad-hoc com identificador fixo: o Acesso Total ao Disco
+          # fica preso a ela (sem assinatura nenhuma, o macOS pode não aceitar).
+          codesign --force --sign - --identifier dev.natan.faro.daemon app/src-tauri/resources/faro-daemon
+          codesign --verify --strict app/src-tauri/resources/faro-daemon
       - name: App (Faro.app universal, com o daemon dentro)
         working-directory: app
         run: |
@@ -79,7 +83,7 @@ jobs:
       - name: Assinatura ad-hoc e Faro.zip
         run: |
           APP=target/universal-apple-darwin/release/bundle/macos/Faro.app
-          test -x "$APP/Contents/Resources/resources/vigia-daemon"
+          test -x "$APP/Contents/Resources/resources/faro-daemon"
           codesign --force --deep --sign - "$APP"
           codesign --verify --deep --strict "$APP"
           # ditto preserva o bundle (links simbólicos, permissões, assinatura).

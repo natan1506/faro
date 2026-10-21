@@ -930,8 +930,12 @@ table.excecoes td {
   margin: 0 0 8px;
   max-width: 64ch;
 }
+.passo-ajuda p.passo-nota {
+  margin: 8px 0 0;
+}
 .cmd {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
 }

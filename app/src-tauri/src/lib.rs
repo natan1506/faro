@@ -330,7 +330,7 @@ fn open_painel(app: AppHandle, alert_id: Option<i64>) {
 /// Caminho do daemon que vai dentro do Faro.app (recurso do bundle).
 fn daemon_do_bundle(app: &AppHandle) -> Option<std::path::PathBuf> {
     app.path()
-        .resolve("resources/vigia-daemon", tauri::path::BaseDirectory::Resource)
+        .resolve("resources/faro-daemon", tauri::path::BaseDirectory::Resource)
         .ok()
 }
 
@@ -338,6 +338,16 @@ fn daemon_do_bundle(app: &AppHandle) -> Option<std::path::PathBuf> {
 #[tauri::command]
 fn daemon_embutido(app: AppHandle) -> bool {
     daemon_do_bundle(&app).is_some_and(|p| p.is_file())
+}
+
+/// Mostra o binário do serviço instalado no Finder, para arrastar até a lista do
+/// Acesso Total ao Disco. O caminho é fixo: o app não abre outro arquivo por aqui.
+#[tauri::command]
+fn revelar_daemon() -> Result<(), String> {
+    if !std::path::Path::new(instalador::BIN).is_file() {
+        return Err("O serviço ainda não está instalado. Clique em Instalar no passo anterior.".into());
+    }
+    open(&["-R", instalador::BIN])
 }
 
 /// Instala (ou atualiza) o serviço pedindo a senha na janela nativa do macOS.
@@ -586,6 +596,7 @@ pub fn run() {
             notch::notch_metrics,
             daemon_embutido,
             instalar_daemon,
+            revelar_daemon,
             notch::notch_hit_area,
             notch::notch_focusable,
             notch::notch_cursor,

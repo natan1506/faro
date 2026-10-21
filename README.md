@@ -100,7 +100,7 @@ Requisitos: **macOS 13 (Ventura) ou mais novo**, Intel ou Apple Silicon.
 1. Baixe o **`Faro.zip`** da [última Release](https://github.com/natan1506/faro/releases/latest) e abra: aparece o **Faro.app**.
 2. Arraste o Faro.app para **Aplicativos** e abra.
 3. Na tela **Início**, clique em **Instalar**. O macOS pede a sua senha para instalar o serviço que vigia o Mac (ele vai dentro do app).
-4. Clique em **Abrir Ajustes do macOS** no passo seguinte e dê **Acesso Total ao Disco** a `/usr/local/vigia/vigia-daemon`. Sem isso o Endpoint Security não sobe.
+4. Clique em **Abrir Ajustes do macOS** no passo seguinte e dê **Acesso Total ao Disco** ao `faro-daemon` (em `/usr/local/faro/faro-daemon`). Sem isso o Endpoint Security não sobe.
 
 Pronto: a raposinha passa a vigiar.
 
@@ -137,7 +137,7 @@ Mostra quantos eventos por segundo chegam e **o que teria virado alerta** no seu
 ```mermaid
 flowchart TD
     K["Endpoint Security<br/>(kernel do macOS)"] -->|exec · open · btm_launch_item_add| E["/usr/bin/eslogger"]
-    E -->|JSON por linha| D["vigia-daemon<br/>(Rust, root, LaunchDaemon)"]
+    E -->|JSON por linha| D["faro-daemon<br/>(Rust, root, LaunchDaemon)"]
     D --> R["motor de regras<br/>onde o processo roda × o que ele lê"]
     D --> P["a cada 5 s: rede (lsof)<br/>a cada 10 s: permissões (TCC)"]
     D --> S[("SQLite<br/>alertas por 30 dias")]
@@ -195,9 +195,9 @@ Os ajustes de segurança são gravados pelo daemon (root) em `/Library/Applicati
 <summary><b>Pelo terminal</b></summary>
 
 ```bash
-/usr/local/vigia/vigia-daemon tail                          # alertas ao vivo
-/usr/local/vigia/vigia-daemon act --id 12 --action kill_tree
-sudo /usr/local/vigia/vigia-daemon check --config "/Library/Application Support/Vigia/config.yaml"
+/usr/local/faro/faro-daemon tail                          # alertas ao vivo
+/usr/local/faro/faro-daemon act --id 12 --action kill_tree
+sudo /usr/local/faro/faro-daemon check --config "/Library/Application Support/Vigia/config.yaml"
 sudo tail -f /Library/Logs/Vigia/daemon.log
 sudo launchctl kickstart -k system/dev.natan.vigia          # reiniciar o daemon
 ```

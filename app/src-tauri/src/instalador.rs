@@ -1,7 +1,7 @@
 //! Instala o daemon a partir do próprio Faro.app, como num app comum: baixar,
 //! arrastar para Aplicativos, abrir e clicar em "Instalar" no Início.
 //!
-//! O daemon vai dentro do app (recurso `resources/vigia-daemon`, posto lá pelo
+//! O daemon vai dentro do app (recurso `resources/faro-daemon`, posto lá pelo
 //! build). A instalação roda como root pela janela nativa de senha do macOS
 //! (`osascript ... with administrator privileges`). O script inteiro, com a
 //! config e o LaunchDaemon, vai em memória para o osascript: nada é gravado num
@@ -11,8 +11,8 @@
 use std::path::Path;
 
 pub const LABEL: &str = "dev.natan.vigia";
-pub const BIN_DIR: &str = "/usr/local/vigia";
-pub const BIN: &str = "/usr/local/vigia/vigia-daemon";
+pub const BIN_DIR: &str = "/usr/local/faro";
+pub const BIN: &str = "/usr/local/faro/faro-daemon";
 pub const DATA_DIR: &str = "/Library/Application Support/Vigia";
 pub const CONFIG: &str = "/Library/Application Support/Vigia/config.yaml";
 pub const LOG_DIR: &str = "/Library/Logs/Vigia";
@@ -79,6 +79,7 @@ FARO_FIM
 chown root:wheel {plist_path}
 chmod 644 {plist_path}
 launchctl bootout system/{label} 2>/dev/null || true
+rm -rf /usr/local/vigia
 launchctl bootstrap system {plist_path}
 "#,
         bin_dir = sh(BIN_DIR),
@@ -159,11 +160,13 @@ mod tests {
 
     #[test]
     fn script_cita_os_caminhos() {
-        let s = script(Path::new("/Applications/Faro.app/Contents/Resources/resources/vigia-daemon"), "x: 1").unwrap();
-        assert!(s.contains("install -o root -g wheel -m 755 '/Applications/Faro.app/Contents/Resources/resources/vigia-daemon' '/usr/local/vigia/vigia-daemon'"));
+        let s = script(Path::new("/Applications/Faro.app/Contents/Resources/resources/faro-daemon"), "x: 1").unwrap();
+        assert!(s.contains("install -o root -g wheel -m 755 '/Applications/Faro.app/Contents/Resources/resources/faro-daemon' '/usr/local/faro/faro-daemon'"));
         assert!(s.contains("'/Library/Application Support/Vigia/config.yaml'"));
         assert!(s.contains("launchctl bootstrap system '/Library/LaunchDaemons/dev.natan.vigia.plist'"));
         assert!(s.contains("<<'FARO_FIM'"));
+        // O binário antigo (até a 0.1.0) sai depois de o serviço parar.
+        assert!(s.find("bootout").unwrap() < s.find("rm -rf /usr/local/vigia\n").unwrap());
     }
 
     #[test]

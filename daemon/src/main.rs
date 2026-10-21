@@ -39,7 +39,7 @@ const DEFAULT_CONFIG: &str = "/Library/Application Support/Vigia/config.yaml";
 
 #[derive(Parser)]
 #[command(
-    name = "vigia-daemon",
+    name = "faro-daemon",
     version,
     about = "Monitoramento em tempo real do Mac (Endpoint Security via eslogger)"
 )]
