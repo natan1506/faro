@@ -114,7 +114,8 @@ if (( COM_APP )); then
   passo "Instalando o app em /Applications"
   # O app se chamava Vigia: tira a versão antiga com o nome velho, se houver.
   rm -rf /Applications/Vigia.app /Applications/Faro.app
-  cp -R "$APP_SRC" /Applications/Faro.app
+  # mv, não cp: a cópia do build no projeto aparecia como um segundo Faro no Spotlight.
+  mv "$APP_SRC" /Applications/Faro.app
   open /Applications/Faro.app
   echo "Para abrir o app no login: Ajustes > Geral > Itens de Início > + > Faro."
   echo "(O próprio Faro vai alertar esse item novo de inicialização: é esperado, clique em Permitir sempre.)"
