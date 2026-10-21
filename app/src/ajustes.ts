@@ -8,7 +8,7 @@ const RULES: { id: string; hint: string }[] = [
   { id: "secret_read", hint: ".env, ~/.aws, ~/.ssh, cookies e senhas do navegador lidos fora do próprio projeto." },
   { id: "third_party_shell", hint: "node/npm chamando curl, osascript, security… ou um shell numa pasta de terceiros." },
   { id: "unsigned_exec", hint: "Programa sem assinatura rodando de /tmp, Downloads ou Library." },
-  { id: "persistence", hint: "LaunchAgent, LaunchDaemon ou item de login novo (o backdoor do incidente)." },
+  { id: "persistence", hint: "LaunchAgent, LaunchDaemon ou item de login novo: o jeito mais comum de um malware voltar a cada login." },
   { id: "tcc_change", hint: "App novo com Monitoramento de Entrada, Acessibilidade ou gravação de tela." },
   { id: "new_connection", hint: "node, python, curl… falando com uma rede que nunca usaram." },
 ];

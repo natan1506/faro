@@ -77,8 +77,10 @@ function renderState() {
       metrics.append(h("span", { title: "O motor de regras não deu conta do volume e descartou eventos." }, `${s.events_dropped.toLocaleString("pt-BR")} descartados`));
     }
     if (s.learning_until && ms(s.learning_until) > Date.now()) {
-      const until = new Date(ms(s.learning_until)).toLocaleString("pt-BR", { weekday: "short", hour: "2-digit", minute: "2-digit" });
-      metrics.append(h("span", { title: "Até lá, a regra de rede só aprende quais programas usam a internet." }, `Aprendendo a rede até ${until}`));
+      const d = new Date(ms(s.learning_until));
+      const dia = d.toLocaleDateString("pt-BR", { weekday: "long" }).replace("-feira", "");
+      const hora = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+      metrics.append(h("span", { title: "Até lá, a regra de rede só aprende quais programas usam a internet." }, `Aprendendo a rede até ${dia}, ${hora}`));
     }
   }
   renderBanners();
@@ -434,6 +436,13 @@ async function run(a: Alert, action: ActionKind, note: HTMLElement) {
 
 let timeline: ExecEntry[] = [];
 
+/** As duas últimas pastas do caminho (o nome do projeto é o que importa); o caminho inteiro fica na dica. */
+function pastaCurta(cwd: string): string {
+  const p = shortPath(cwd);
+  const partes = p.split("/").filter(Boolean);
+  return partes.length > 3 ? `…/${partes.slice(-2).join("/")}` : p;
+}
+
 function renderProcs() {
   const q = $<HTMLInputElement>("proc-filter").value.trim().toLowerCase();
   const hideApple = $<HTMLInputElement>("hide-apple").checked;
@@ -449,8 +458,8 @@ function renderProcs() {
         "tr",
         {},
         h("td", { class: "when" }, time(t.ts)),
-        h("td", {}, h("span", { class: "name" }, basename(t.path)), h("span", { class: "args mono" }, t.args.slice(1).join(" ") || shortPath(t.path))),
-        h("td", { class: "cwd mono" }, t.cwd ? shortPath(t.cwd) : ""),
+        h("td", { title: t.path }, h("span", { class: "name" }, basename(t.path)), h("span", { class: "args mono", title: t.args.slice(1).join(" ") }, t.args.slice(1).join(" ") || shortPath(t.path))),
+        h("td", { class: "cwd mono", title: t.cwd ? shortPath(t.cwd) : "" }, t.cwd ? pastaCurta(t.cwd) : ""),
         h("td", { class: "pid" }, String(t.pid)),
       ),
     ),

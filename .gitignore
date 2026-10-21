@@ -10,7 +10,7 @@ app/src-tauri/gen/
 _to_delete/
 .playwright-mcp/
 
-# Documentos internos: contam o incidente e o contexto de trabalho; ficam só na máquina.
+# Documentos internos de desenvolvimento; ficam só na máquina.
 CLAUDE.md
 docs/superpowers/
 app/src-tauri/resources/faro-daemon

@@ -8,14 +8,14 @@ const status = (state: string, extra: Partial<Status> = {}): Status =>
 const settings = (extra: Partial<Settings> = {}): Settings =>
   ({ third_party_dirs: [], watch_dirs: [], rules: {}, ntfy_enabled: false, ntfy_topic: "", ...extra });
 const config = (c: Partial<AppConfig["checklist"]> = {}) =>
-  ({ checklist: { reviewed_normal: false, cofre_done: false, ...c } }) as AppConfig;
+  ({ checklist: { reviewed_normal: false, ...c } }) as AppConfig;
 const alerta = (id: number, severity: Alert["severity"], ts: string, title = `a${id}`, st: Alert["status"] = "open"): Alert =>
   ({ id, severity, ts, title, status: st }) as Alert;
 
 test("sem daemon, só os passos manuais podem estar feitos", () => {
-  const s = steps({ connected: false, status: status("running"), settings: settings({ third_party_dirs: ["~/x"], ntfy_enabled: true }), config: config({ reviewed_normal: true, cofre_done: true }), celular: true });
-  assert.deepEqual(s.map((x) => x.id), ["daemon", "fda", "terceiros", "celular", "normal", "cofre"]);
-  assert.deepEqual(s.map((x) => x.done), [false, false, false, false, true, true]);
+  const s = steps({ connected: false, status: status("running"), settings: settings({ third_party_dirs: ["~/x"], ntfy_enabled: true }), config: config({ reviewed_normal: true }), celular: true });
+  assert.deepEqual(s.map((x) => x.id), ["daemon", "fda", "terceiros", "celular", "normal"]);
+  assert.deepEqual(s.map((x) => x.done), [false, false, false, false, true]);
 });
 
 test("sensor running marca o acesso ao disco", () => {
@@ -34,12 +34,11 @@ test("pasta de terceiros e celular vêm dos ajustes", () => {
   assert.equal(v[3].done, false);
 });
 
-test("passos manuais vêm do app.json", () => {
-  const s = steps({ connected: true, status: null, settings: null, config: config({ reviewed_normal: true }), celular: true });
-  assert.equal(s[4].done, true);
-  assert.equal(s[5].done, false);
-  assert.equal(s[0].title, "Instalar o Faro");
-  assert.equal(s[5].action, "Ver como");
+test("o passo manual vem do app.json", () => {
+  const i = { connected: true, status: null, settings: null, celular: true };
+  assert.equal(steps({ ...i, config: config({ reviewed_normal: true }) })[4].done, true);
+  assert.equal(steps({ ...i, config: config() })[4].done, false);
+  assert.equal(steps({ ...i, config: config() })[0].title, "Instalar o Faro");
 });
 
 test("headline com 1 alerta usa o singular", () => {
@@ -80,7 +79,7 @@ test("o mais grave é o de maior severidade, depois o mais recente", () => {
   assert.equal(h.line, "O mais grave: crítica nova, há 1 h.");
 });
 
-test("com o celular desligado, o passo some e sobram 5", () => {
+test("com o celular desligado, o passo some e sobram 4", () => {
   const s = steps({ connected: true, status: status("running"), settings: settings({ ntfy_enabled: true }), config: config(), celular: false });
-  assert.deepEqual(s.map((x) => x.id), ["daemon", "fda", "terceiros", "normal", "cofre"]);
+  assert.deepEqual(s.map((x) => x.id), ["daemon", "fda", "terceiros", "normal"]);
 });

@@ -123,7 +123,7 @@ fi
 
 passo "Pronto"
 cat <<EOF
-Teste com a simulação segura do incidente:   ./scripts/simular.sh
+Teste com a simulação segura de um ataque:   ./scripts/simular.sh
 Acompanhe pelo terminal:                     $BIN tail
 Log do daemon:                               sudo tail -f $LOG_DIR/daemon.log
 EOF

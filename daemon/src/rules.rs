@@ -196,7 +196,7 @@ impl Engine {
         process.cwd = cwd.clone();
         {
             // Fora das pastas escolhidas nos Ajustes o .env não interessa, a não ser que
-            // quem lê rode numa pasta de terceiros (o caso do incidente).
+            // quem lê rode numa pasta de terceiros (um repositório malicioso lendo segredos de outro projeto).
             let c = self.cfg.read().unwrap();
             let reader_untrusted = cwd.as_deref().is_some_and(|d| c.in_third_party(d));
             if c.env_outside_watch(&path) && !reader_untrusted {

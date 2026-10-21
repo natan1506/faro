@@ -107,7 +107,7 @@ function desenharLista() {
         "div",
         { class: "empty" },
         h("strong", {}, "Pergunte sobre o que o Faro está vendo"),
-        'Por exemplo: "o que é esse twhelper?", "esse alerta é perigoso?" ou "o que eu faço agora?". A IA explica e recomenda; quem age é você.',
+        'Por exemplo: "o que é esse processo?", "esse alerta é perigoso?" ou "o que eu faço agora?". A IA explica e recomenda; quem age é você.',
       ),
     );
   }

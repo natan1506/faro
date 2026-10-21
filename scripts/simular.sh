@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Roda a simulação segura do incidente (lab/simulacao.mjs) de dentro da pasta de
+# Roda a simulação segura de um ataque (lab/simulacao.mjs) de dentro da pasta de
 # repositórios de terceiros, como o malware rodou. Desfaz tudo no fim, mesmo
 # se você encerrar o processo pelo alerta.
 #

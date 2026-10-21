@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Desenvolvimento sem root e sem instalar nada: sobe o daemon em modo replay com
-# a reconstituição do incidente e abre o app em modo dev apontando para ele.
+# uma gravação fictícia de um ataque e abre o app em modo dev apontando para ele.
 # Os alertas descem da pílula do topo uns 25 s depois de o daemon subir.
 set -euo pipefail
 
@@ -25,7 +25,7 @@ cd "$RAIZ"
 cargo build -p vigia-daemon
 # O replay começa depois de 25 s, para dar tempo de o app compilar e conectar.
 ./target/debug/vigia-daemon run --config "$DEV/config.yaml" --no-pollers --replay-delay 25 \
-  --replay "$RAIZ/daemon/tests/fixtures/incidente.jsonl" &
+  --replay "$RAIZ/daemon/tests/fixtures/ataque.jsonl" &
 DAEMON=$!
 trap 'kill $DAEMON 2>/dev/null || true' EXIT
 

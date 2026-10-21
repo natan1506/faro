@@ -25,16 +25,16 @@ ou se instalando no login? O Faro avisa na hora, com um botão para encerrar.
 
 ## Por que existe
 
-Tudo começou com um repositório que parecia **legítimo e inofensivo**. Clonado só para rodar uma vez, ele fez em poucos segundos o que todo dev teme:
+Clonar um repositório para rodar uma vez é rotina. Basta um deles ser malicioso, mesmo parecendo **legítimo e inofensivo**, para que em poucos segundos:
 
-1. um `node` rodando dentro do repositório **leu os `.env` de outros projetos** e as credenciais da AWS;
-2. chamou `curl ... | sh`;
-3. baixou e rodou um **binário sem assinatura** em `/tmp`;
-4. registrou um **LaunchAgent** para voltar a cada login.
+1. um `node` rodando dentro do repositório **leia os `.env` de outros projetos** e as credenciais da AWS;
+2. chame `curl ... | sh`;
+3. baixe e rode um **binário sem assinatura** em `/tmp`;
+4. registre um **LaunchAgent** para voltar a cada login.
 
-O antivírus não viu nada, porque nada daquilo era "vírus": era `node`, `curl` e `launchctl`, as mesmas ferramentas que usamos o dia inteiro. O que denunciava o ataque era o **contexto**: código de uma pasta de terceiros mexendo em segredos de outro projeto.
+O antivírus não vê nada, porque nada disso é "vírus": é `node`, `curl` e `launchctl`, as mesmas ferramentas que usamos o dia inteiro. O que denuncia o ataque é o **contexto**: código de uma pasta de terceiros mexendo em segredos de outro projeto.
 
-O Faro nasceu para enxergar esse contexto. Ele observa o que os processos fazem pelo **Endpoint Security** do macOS e pergunta *onde* cada processo roda, não só *qual programa* ele é. O `next dev` lendo o `.env` do próprio projeto é normal. O mesmo `node`, rodando num repositório de terceiros e lendo o `.env` de outro projeto, vira um alerta crítico.
+O Faro existe para enxergar esse contexto. Ele observa o que os processos fazem pelo **Endpoint Security** do macOS e pergunta *onde* cada processo roda, não só *qual programa* ele é. O `next dev` lendo o `.env` do próprio projeto é normal. O mesmo `node`, rodando num repositório de terceiros e lendo o `.env` de outro projeto, vira um alerta crítico.
 
 > O Faro **detecta**, ele não **bloqueia**: o alerta chega frações de segundo depois da ação. Ele complementa um cofre de segredos (tirar os `.env` do disco), não o substitui.
 
@@ -212,7 +212,7 @@ cargo test --workspace     # testes do daemon, do app e um ponta a ponta com o r
 ./scripts/dev.sh           # daemon em replay (sem root) + app em modo dev
 ```
 
-O `dev.sh` sobe o daemon com `daemon/tests/fixtures/incidente.jsonl`, uma **reconstituição fictícia** de um ataque no formato do `eslogger`, e abre o app apontando para ele. Esses alertas aparecem com a etiqueta azul **Simulação**, e os botões não executam nada no Mac.
+O `dev.sh` sobe o daemon com `daemon/tests/fixtures/ataque.jsonl`, uma **gravação fictícia** de um ataque no formato do `eslogger`, e abre o app apontando para ele. Esses alertas aparecem com a etiqueta azul **Simulação**, e os botões não executam nada no Mac.
 
 Para ver só a interface no navegador, sem Tauri nem daemon: `cd app && npm run dev` e abra `http://localhost:1420/?mock=1` (painel) ou `/notch.html?mock=1` (pílula). Parâmetros: `&estado=0|3|6|replay|fora` e `&ia=claude|ambos|codex|nenhum|erro|acked`.
 

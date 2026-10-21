@@ -201,7 +201,7 @@ mod tests {
                 assert_eq!(instigator.unwrap().pid, 4100);
                 assert_eq!(
                     item_path.as_deref(),
-                    Some("/Users/dev/Library/LaunchAgents/com.tailwind helper.plist")
+                    Some("/Users/dev/Library/LaunchAgents/com.updater helper.plist")
                 );
                 assert_eq!(
                     executable_path.as_deref(),

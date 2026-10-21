@@ -217,7 +217,7 @@ impl Default for PersistenceRule {
 pub struct ThirdPartyShellRule {
     pub enabled: bool,
     pub severity: Severity,
-    /// Processos "pais" que rodam código de pacotes (o malware do incidente rodou dentro do node).
+    /// Processos "pais" que rodam código de pacotes (um pacote malicioso roda dentro do node).
     pub parents: Vec<String>,
     /// Sempre suspeitos quando lançados por um desses pais, em qualquer pasta.
     pub always_suspicious: Vec<String>,

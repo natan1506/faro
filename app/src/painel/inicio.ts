@@ -1,11 +1,8 @@
-// Início: card de destaque (só texto), a configuração inicial (5 ou 6 passos, conforme o celular) e as proteções.
+// Início: card de destaque (só texto), a configuração inicial (4 ou 5 passos, conforme o celular) e as proteções.
 import { api, events, h, ms, type Alert, type AppConfig, type Settings, type Status } from "../api";
 import { CELULAR } from "../recursos";
 import { headline, steps, type StepId } from "../checklist";
 import type { SectionId } from "../painel";
-
-const COFRE_TEXTO =
-  "Hoje cada dev guarda os .env no disco, e foi de lá que o incidente de 16/10 tirou as credenciais. A saída é um cofre de secrets (a proposta que foi para o time): as chaves ficam fora do disco e entram só na hora de rodar. Quando terminar, marque como feito.";
 
 let root: HTMLElement;
 let ir: (id: SectionId) => void = () => {};
@@ -48,7 +45,7 @@ async function carregar() {
   desenhar();
 }
 
-async function salvarChecklist(chave: "reviewed_normal" | "cofre_done") {
+async function salvarChecklist(chave: "reviewed_normal") {
   if (!config) return;
   const novo: AppConfig = JSON.parse(JSON.stringify(config));
   novo.checklist[chave] = true;
@@ -158,15 +155,6 @@ function ajuda(id: StepId): HTMLElement | null {
       h("p", { class: "passo-nota" }, "Ligue a chave do faro-daemon. O passo se marca sozinho em até um minuto."),
     );
   }
-  if (id === "cofre") {
-    const url = config?.cofre_url ?? "";
-    return h(
-      "div",
-      { class: "passo-ajuda" },
-      h("p", {}, COFRE_TEXTO),
-      url ? h("button", { type: "button", class: "add", onclick: () => void abrirUrl(url) }, "Abrir a proposta") : null,
-    );
-  }
   return null;
 }
 
@@ -183,7 +171,6 @@ function botao(id: StepId, texto: string): HTMLElement {
     terceiros: () => void escolherPasta(),
     celular: () => ir("celular"),
     normal: () => ir("atividade"),
-    cofre: () => ((aberto = aberto === "cofre" ? null : "cofre"), desenhar()),
   };
   return h("button", { type: "button", class: "add", onclick: acao[id] }, texto);
 }
@@ -230,8 +217,8 @@ function checklist(): HTMLElement | null {
                   "span",
                   { class: "passo-acoes" },
                   botao(s.id, s.action),
-                  s.id === "normal" || s.id === "cofre"
-                    ? h("button", { type: "button", class: "link", onclick: () => void salvarChecklist(s.id === "normal" ? "reviewed_normal" : "cofre_done") }, "Marcar como feito")
+                  s.id === "normal"
+                    ? h("button", { type: "button", class: "link", onclick: () => void salvarChecklist("reviewed_normal") }, "Marcar como feito")
                     : null,
                 ),
           ),

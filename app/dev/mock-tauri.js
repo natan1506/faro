@@ -14,9 +14,9 @@ const alertas = [
   },
   {
     id: 2, ts: iso(30), first_ts: iso(40), rule: "persistence", severity: "critical", count: 2, status: "open", simulated: true,
-    title: "Novo item de inicialização: com.tailwind.helper.plist", detail: "Um LaunchAgent novo foi registrado.",
-    target: "/Users/dev/Library/LaunchAgents/com.tailwind.helper.plist",
-    process: proc(80005, 1, "/private/tmp/.tw-cache/twhelper"), chain: [], actions: ["kill_tree", "quarantine", "allow", "dismiss"],
+    title: "Novo item de inicialização: com.updater.helper.plist", detail: "Um LaunchAgent novo foi registrado.",
+    target: "/Users/dev/Library/LaunchAgents/com.updater.helper.plist",
+    process: proc(80005, 1, "/private/tmp/.upd-cache/updhelper"), chain: [], actions: ["kill_tree", "quarantine", "allow", "dismiss"],
   },
   {
     id: 1, ts: iso(60 * 26), first_ts: iso(60 * 26), rule: "new_connection", severity: "medium", count: 1, status: "dismissed",
@@ -44,7 +44,7 @@ const dados = {
     sound: { enabled: true, volume: 0.6, high: "/System/Library/Sounds/Sosumi.aiff", medium: "/System/Library/Sounds/Tink.aiff" },
     auto_close_secs: 15,
     ai: { provider: "claude", model: "", codex_ack_at: null, claude_models: [], codex_models: [] },
-    checklist: { reviewed_normal: false, cofre_done: false }, cofre_url: "",
+    checklist: { reviewed_normal: false },
   },
   list_system_sounds: ["Basso", "Blow", "Glass", "Sosumi", "Tink"].map((n) => `/System/Library/Sounds/${n}.aiff`),
   allowlist: [
@@ -90,7 +90,7 @@ if (estado === "0") {
   dados.get_settings.ntfy_enabled = false;
 } else if (estado === "6") {
   dados.history.forEach((a) => (a.status = "dismissed")); dados.status.alerts_open = 0;
-  dados.get_app_config.checklist = { reviewed_normal: true, cofre_done: true };
+  dados.get_app_config.checklist = { reviewed_normal: true };
 } else if (estado === "replay") {
   dados.status.sensor = { state: "replay" };
 } else if (estado === "fora") {

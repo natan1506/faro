@@ -19,7 +19,6 @@ pub struct AppConfig {
     pub auto_close_secs: u32,
     pub ai: AiConfig,
     pub checklist: ChecklistMarks,
-    pub cofre_url: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -57,7 +56,6 @@ pub enum AiProvider {
 #[serde(default)]
 pub struct ChecklistMarks {
     pub reviewed_normal: bool,
-    pub cofre_done: bool,
 }
 
 impl Default for AppConfig {
@@ -67,7 +65,6 @@ impl Default for AppConfig {
             auto_close_secs: 15,
             ai: AiConfig::default(),
             checklist: ChecklistMarks::default(),
-            cofre_url: String::new(),
         }
     }
 }
@@ -187,7 +184,6 @@ fn from_map(m: &Map<String, Value>, onde: &str) -> AppConfig {
     let c = objeto(m, "checklist", onde);
     let checklist = ChecklistMarks {
         reviewed_normal: campo(&c, "reviewed_normal", d.checklist.reviewed_normal, sempre, onde),
-        cofre_done: campo(&c, "cofre_done", d.checklist.cofre_done, sempre, onde),
     };
 
     AppConfig {
@@ -195,7 +191,6 @@ fn from_map(m: &Map<String, Value>, onde: &str) -> AppConfig {
         auto_close_secs: campo(m, "auto_close_secs", d.auto_close_secs, |v: &u32| auto_close_ok(*v), onde),
         ai,
         checklist,
-        cofre_url: campo(m, "cofre_url", d.cofre_url.clone(), sempre, onde),
     }
 }
 
@@ -326,7 +321,7 @@ mod tests {
         let mut c = AppConfig { auto_close_secs: 10, ..AppConfig::default() };
         c.sound.medium = snd.to_string_lossy().into();
         c.ai.provider = AiProvider::Codex;
-        c.checklist.cofre_done = true;
+        c.checklist.reviewed_normal = true;
         save(&p, &c, &AppConfig::default()).unwrap();
         assert_eq!(load(&p), c);
     }
@@ -343,14 +338,14 @@ mod tests {
         let c = ler(
             "som-sumiu",
             r#"{"sound":{"enabled":false,"volume":0.3,"high":"/nao/existe/meu.mp3"},
-               "auto_close_secs":30,"checklist":{"cofre_done":true},
+               "auto_close_secs":30,"checklist":{"reviewed_normal":true},
                "ai":{"provider":"codex","codex_ack_at":"2026-10-19T12:00:00Z"}}"#,
         );
         assert_eq!(c.sound.high, SoundConfig::default().high);
         assert!(!c.sound.enabled);
         assert_eq!(c.sound.volume, 0.3);
         assert_eq!(c.auto_close_secs, 30);
-        assert!(c.checklist.cofre_done);
+        assert!(c.checklist.reviewed_normal);
         assert_eq!(c.ai.provider, AiProvider::Codex);
         assert_eq!(c.ai.codex_ack_at.as_deref(), Some("2026-10-19T12:00:00Z"));
         // E o que foi lido salva de novo.
@@ -361,12 +356,11 @@ mod tests {
     fn bad_auto_close_falls_back_and_keeps_the_rest() {
         let c = ler(
             "vinte",
-            r#"{"auto_close_secs":20,"sound":{"volume":7},"cofre_url":"https://x",
+            r#"{"auto_close_secs":20,"sound":{"volume":7},"campo_antigo":"x",
                "checklist":{"reviewed_normal":true}}"#,
         );
         assert_eq!(c.auto_close_secs, 15);
         assert_eq!(c.sound.volume, SoundConfig::default().volume);
-        assert_eq!(c.cofre_url, "https://x");
         assert!(c.checklist.reviewed_normal);
         assert_eq!(validate(&c, &c), Ok(()));
     }
@@ -376,20 +370,20 @@ mod tests {
         let c = ler(
             "gemini",
             r#"{"ai":{"provider":"gemini","model":"x","codex_ack_at":"2026-10-19T12:00:00Z",
-               "codex_models":["gpt-5"]},"checklist":{"reviewed_normal":true,"cofre_done":true},
+               "codex_models":["gpt-5"]},"checklist":{"reviewed_normal":true},
                "auto_close_secs":10}"#,
         );
         assert_eq!(c.ai.provider, AiProvider::Claude);
         assert_eq!(c.ai.model, "x");
         assert_eq!(c.ai.codex_ack_at.as_deref(), Some("2026-10-19T12:00:00Z"));
         assert_eq!(c.ai.codex_models, ["gpt-5"]);
-        assert!(c.checklist.reviewed_normal && c.checklist.cofre_done);
+        assert!(c.checklist.reviewed_normal);
         assert_eq!(c.auto_close_secs, 10);
     }
 
     #[test]
     fn wrong_types_fall_back_per_field() {
-        let c = ler("tipos", r#"{"sound":"x","ai":{"claude_models":"opus"},"cofre_url":3}"#);
+        let c = ler("tipos", r#"{"sound":"x","ai":{"claude_models":"opus"},"auto_close_secs":"x"}"#);
         assert_eq!(c, AppConfig::default());
         assert_eq!(ler("lista", "[1,2]"), AppConfig::default());
     }
@@ -400,7 +394,7 @@ mod tests {
         atual.sound.high = "/nao/existe/meu.mp3".into();
         let mut novo = atual.clone();
         novo.sound.enabled = false;
-        novo.checklist.cofre_done = true;
+        novo.checklist.reviewed_normal = true;
         assert_eq!(validate(&novo, &atual), Ok(()));
         // Escolher agora um som que não existe continua recusado.
         novo.sound.medium = "/nao/existe/outro.mp3".into();

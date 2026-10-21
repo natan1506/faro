@@ -1,6 +1,6 @@
-// Simulação SEGURA do incidente de 16/10, para testar o Vigia de ponta a ponta.
+// Simulação SEGURA de um ataque de cadeia de suprimentos, para testar o Faro de ponta a ponta.
 //
-// Não há nada malicioso aqui: ela repete os passos do malware com alvos falsos e
+// Não há nada malicioso aqui: ela repete os passos de um malware com alvos falsos e
 // desfaz tudo no fim. Cada passo deveria gerar um alerta:
 //   1. lê um .env de "outro projeto"            -> Leitura de segredo
 //   2. node executa curl                         -> Comando suspeito
@@ -48,7 +48,7 @@ function step(n, text, fn) {
   pause(2);
 }
 
-console.log(`Simulação do incidente, pid ${process.pid}, rodando em ${process.cwd()}\n`);
+console.log(`Simulação de ataque, pid ${process.pid}, rodando em ${process.cwd()}\n`);
 
 step(1, `lendo ${envPath}`, () => {
   readFileSync(envPath, "utf8");

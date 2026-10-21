@@ -95,8 +95,7 @@ export interface AppConfig {
     claude_models: string[];
     codex_models: string[];
   };
-  checklist: { reviewed_normal: boolean; cofre_done: boolean };
-  cofre_url: string;
+  checklist: { reviewed_normal: boolean };
 }
 
 /** Sugestão de ação que a IA deixou na resposta; vira botão (quem executa é você). */

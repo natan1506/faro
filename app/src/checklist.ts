@@ -3,7 +3,7 @@
 import type { Alert, AppConfig, Settings, Severity, Status } from "./api.ts";
 import { CELULAR } from "./recursos.ts";
 
-export type StepId = "daemon" | "fda" | "terceiros" | "celular" | "normal" | "cofre";
+export type StepId = "daemon" | "fda" | "terceiros" | "celular" | "normal";
 export interface Step {
   id: StepId;
   title: string;
@@ -22,7 +22,6 @@ export function steps(i: { connected: boolean; status: Status | null; settings: 
     { id: "terceiros", title: "Marcar a pasta de repositórios de terceiros", done: c && (i.settings?.third_party_dirs.length ?? 0) > 0, action: "Escolher pasta" },
     { id: "celular", title: "Receber alertas no celular", done: c && i.settings?.ntfy_enabled === true, action: "Configurar" },
     { id: "normal", title: "Revisar o que é normal no seu dia", done: i.config.checklist.reviewed_normal, action: "Começar" },
-    { id: "cofre", title: "Tirar os .env dos projetos do disco", done: i.config.checklist.cofre_done, action: "Ver como" },
   ];
   return comCelular ? todos : todos.filter((s) => s.id !== "celular");
 }

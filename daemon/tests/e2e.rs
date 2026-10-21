@@ -1,5 +1,5 @@
 //! Teste ponta a ponta: sobe o binário do daemon em modo replay com a
-//! reconstituição do incidente de 16/10, conecta pelo socket como o app faria
+//! gravação fictícia de um ataque, conecta pelo socket como o app faria
 //! e confere alertas, ações, linha do tempo e relatórios do app.
 
 use std::io::{BufRead, BufReader, Write};
@@ -115,7 +115,7 @@ learning_hours: 0
     .unwrap();
     let fixture = concat!(
         env!("CARGO_MANIFEST_DIR"),
-        "/tests/fixtures/incidente.jsonl"
+        "/tests/fixtures/ataque.jsonl"
     );
     let _d = Daemon(
         Command::new(env!("CARGO_BIN_EXE_vigia-daemon"))
@@ -227,7 +227,7 @@ learning_hours: 0
     });
     assert_eq!(entries.len(), 6);
     assert_eq!(
-        entries[0].path, "/private/tmp/.tw-cache/twhelper",
+        entries[0].path, "/private/tmp/.upd-cache/updhelper",
         "mais recente primeiro"
     );
 
@@ -236,12 +236,12 @@ learning_hours: 0
         report: Report {
             rule: "keyboard_tap".into(),
             severity: Severity::Critical,
-            title: "twhelper está lendo o teclado".into(),
+            title: "updhelper está lendo o teclado".into(),
             detail: "teste".into(),
             target: Some("teclado".into()),
             process: ProcInfo {
                 pid: 0,
-                path: "/private/tmp/.tw-cache/twhelper".into(),
+                path: "/private/tmp/.upd-cache/updhelper".into(),
                 ..Default::default()
             },
         },
