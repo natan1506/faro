@@ -38,11 +38,9 @@ O Faro existe para enxergar esse contexto. Ele observa o que os processos fazem 
 
 > O Faro **detecta**, ele não **bloqueia**: o alerta chega frações de segundo depois da ação. Ele complementa um cofre de segredos (tirar os `.env` do disco), não o substitui.
 
-## Inspirado no Coucou
+## Visual
 
-O visual e o jeito de usar vêm do **[Coucou](https://github.com/Louis-CFM/coucou)**, um app de notch para macOS com personagens vivos que adoramos usar. Daí vieram a pílula preta grudada no topo da tela, que abre com um clique e fecha sozinha, o mascote com olhos que seguem o mouse, o painel com barra lateral e o chat com a IA dentro do notch. O Faro pega essa ideia e aponta para outro lugar: em vez de produtividade, **segurança**.
-
-Obrigado ao Coucou pela inspiração. 🦊
+A estilização do Faro é inspirada no **[Coucou](https://github.com/Louis-CFM/coucou)**, um app de notch para macOS. Obrigado pela inspiração. 🦊
 
 ## Telas
 
@@ -243,4 +241,4 @@ Cada push no `main` roda os testes e gera o pacote universal (Intel + Apple Sili
 
 ## Licença
 
-[MIT](LICENSE). Visual inspirado no [Coucou](https://github.com/Louis-CFM/coucou).
+[MIT](LICENSE).

@@ -535,7 +535,7 @@ body {
 .chat-input:disabled {
   opacity: 0.5;
 }
-/* Chat no formato do Coucou: card escuro com brilho, raposinha à esquerda. */
+/* Chat: card escuro com brilho, raposinha à esquerda. */
 .chat-card {
   display: flex;
   gap: 14px;
@@ -620,7 +620,7 @@ body {
 .chat-top .picker {
   justify-content: flex-end;
 }
-/* Campo arredondado com o botão redondo de enviar dentro, como no Coucou. */
+/* Campo arredondado com o botão redondo de enviar dentro. */
 .chat-compose {
   position: relative;
   display: flex;

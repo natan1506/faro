@@ -498,7 +498,7 @@ let chatMsg: string | null = null;
 const codexBlocked = () => !!config && config.ai.provider === "codex" && !config.ai.codex_ack_at;
 
 /**
- * Chat no formato do Coucou: um card escuro com brilho, a raposinha grande à
+ * Chat: um card escuro com brilho, a raposinha grande à
  * esquerda (olhos vivos) e, à direita, o chip de contexto, a última resposta,
  * o badge da IA e o campo com o botão redondo de enviar.
  */

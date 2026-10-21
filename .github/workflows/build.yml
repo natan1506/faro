@@ -4,7 +4,7 @@
 # - Em tags v* (ex.: v0.2.0): também publica o Faro.zip como Release.
 # - Dá para rodar à mão em Actions > Build > Run workflow.
 #
-# Como o Coucou: o Faro.zip traz só o Faro.app. O serviço (daemon) vai dentro
+# O Faro.zip traz só o Faro.app. O serviço (daemon) vai dentro
 # do app e é instalado pelo botão "Instalar" da tela Início, com a senha do Mac.
 # O app tem assinatura ad-hoc (sem Developer ID da Apple): na primeira abertura
 # o macOS pede "Abrir Mesmo Assim" em Ajustes > Privacidade e Segurança.
